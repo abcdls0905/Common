@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="app.cpp" />
+    <ClCompile Include="runtime\platform\view.cpp">
+      <Filter>runtime\platform</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\platform\gl\glview.cpp">
+      <Filter>runtime\platform\gl</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\model\model.cpp">
+      <Filter>runtime\model</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="app.h" />
+    <ClInclude Include="runtime\platform\view.h">
+      <Filter>runtime\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\platform\platform.h">
+      <Filter>runtime\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\platform\gl\glview.h">
+      <Filter>runtime\platform\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\render\shader\shader.h">
+      <Filter>runtime\render\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\model\model.h">
+      <Filter>runtime\model</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="runtime">
+      <UniqueIdentifier>{b6d83fa5-70e8-4985-bed2-a9967b360c44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="runtime\platform">
+      <UniqueIdentifier>{6356a975-e877-4593-8c38-d04a52459b44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="runtime\platform\gl">
+      <UniqueIdentifier>{ef4c8cb3-56cd-4dc8-a114-bf830de80d0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="runtime\render">
+      <UniqueIdentifier>{f2ed1e56-e24e-45ce-9a00-45464fbb5cd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="runtime\render\shader">
+      <UniqueIdentifier>{5ca07194-0eec-4ce1-8b82-8afe341ae7c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="runtime\model">
+      <UniqueIdentifier>{47733730-323e-44c5-bbbb-c946a9f13a9a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
