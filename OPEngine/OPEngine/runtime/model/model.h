@@ -14,12 +14,14 @@ public:
     unsigned int m_VAO;
     unsigned int m_VBO;
     unsigned int m_IBO;
+    unsigned int m_Tex;
     std::vector<MeshData*> m_SubMesh;
 public:
     ~MeshData();
     void SetVertex(float* v, int size);
     void SetIndice(unsigned short* i, int size);
     void CreateShader(const char* vert, const char* frag);
+    void InitTexture(const char* path);
     void Initialize();
 };
 

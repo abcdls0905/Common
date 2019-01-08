@@ -22,12 +22,13 @@ unsigned int VBO, IBO, VAO;
 CModel* pModel = nullptr;
 
 float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-    0.5f, -0.5f, 0.0f,
-    0.0f,  0.5f, 0.0f
+    0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, 
+    0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, 
+    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f 
 }; 
 
-unsigned short indice[] = {0, 1, 2};
+unsigned short indice[] = {0, 1, 2, 0, 2, 3};
 
 void App::Init(int screen_width, int screen_height)
 {
@@ -38,9 +39,10 @@ void App::Init(int screen_width, int screen_height)
     pModel->m_Mesh = new Mesh();
     MeshData* meshData = new MeshData();
     meshData->CreateShader("assets/shader_1.vert", "assets/shader_1.frag");
-    meshData->SetVertex(vertices, 3);
-    meshData->SetIndice(indice, 3);
+    meshData->SetVertex(vertices, 4);
+    meshData->SetIndice(indice, 6);
     meshData->Initialize();
+    meshData->InitTexture("textures/brickwall.jpg");
     pModel->m_Mesh->m_Roots.push_back(meshData);
 }
 
