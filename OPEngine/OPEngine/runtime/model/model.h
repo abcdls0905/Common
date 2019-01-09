@@ -7,6 +7,7 @@ class MeshData
 {
 public:
     int m_VertexSize;
+    int m_ElemSize;
     float* m_Vertex;
     int m_IndiceSize;
     unsigned short* m_Indices;
@@ -15,10 +16,11 @@ public:
     unsigned int m_VBO;
     unsigned int m_IBO;
     unsigned int m_Tex;
+
     std::vector<MeshData*> m_SubMesh;
 public:
     ~MeshData();
-    void SetVertex(float* v, int size);
+    void SetVertex(float* v, int size, int eleSize);
     void SetIndice(unsigned short* i, int size);
     void CreateShader(const char* vert, const char* frag);
     void InitTexture(const char* path);

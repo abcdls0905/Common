@@ -2,11 +2,13 @@
 #pragma once
 
 class View;
+class Camera;
 
 class App
 {
 private:
     View* m_View;
+    Camera* m_Camera;
 public:
     App();
     ~App();
