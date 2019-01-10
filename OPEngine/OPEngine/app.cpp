@@ -5,6 +5,7 @@
 #include "runtime/render/shader/shader.h"
 #include "runtime/model/model.h"
 #include "learnopengl/camera.h"
+#include "runtime/util.h"
 
 App::App()
 {
@@ -88,8 +89,9 @@ void App::Init(int screen_width, int screen_height)
     meshData->CreateShader("assets/shader_1.vert", "assets/shader_1.frag");
     meshData->SetVertex(vertices, 36, 5);
     meshData->SetIndice(indice, 36);
+    meshData->m_Tex = Util::LoadTexture("textures/container.jpg");
+    meshData->m_Tex1 = Util::LoadTexture("textures/awesomeface.png");
     meshData->Initialize();
-    meshData->InitTexture("textures/container.jpg");
     pModel->m_Mesh->m_Roots.push_back(meshData);
 }
 
@@ -113,6 +115,7 @@ void App::BeginRender()
 {
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void App::EndRender()

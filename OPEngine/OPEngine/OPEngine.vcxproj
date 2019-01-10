@@ -84,6 +84,7 @@
     <ClCompile Include="runtime\model\model.cpp" />
     <ClCompile Include="runtime\platform\gl\glview.cpp" />
     <ClCompile Include="runtime\platform\view.cpp" />
+    <ClCompile Include="runtime\util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h" />
@@ -92,6 +93,7 @@
     <ClInclude Include="runtime\platform\platform.h" />
     <ClInclude Include="runtime\platform\view.h" />
     <ClInclude Include="runtime\render\shader\shader.h" />
+    <ClInclude Include="runtime\util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

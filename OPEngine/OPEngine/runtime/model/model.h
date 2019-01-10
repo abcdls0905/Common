@@ -16,6 +16,7 @@ public:
     unsigned int m_VBO;
     unsigned int m_IBO;
     unsigned int m_Tex;
+    unsigned int m_Tex1;
 
     std::vector<MeshData*> m_SubMesh;
 public:

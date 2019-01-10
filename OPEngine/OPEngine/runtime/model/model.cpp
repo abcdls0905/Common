@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "runtime/util.h"
 
 
 MeshData::~MeshData(){
@@ -32,6 +33,9 @@ void MeshData::CreateShader(const char* vert, const char* frag)
 
 void MeshData::Initialize()
 {
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+
     glGenVertexArrays(1, &m_VAO);
     glGenBuffers(1, &m_VBO);
 
@@ -53,26 +57,7 @@ void MeshData::Initialize()
 
 void MeshData::InitTexture(const char* path)
 {
-    glGenTextures(1, &m_Tex);
-    glBindTexture(GL_TEXTURE_2D, m_Tex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);    
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    m_Tex = Util::LoadTexture(path);
 }
 
 
@@ -100,9 +85,12 @@ const unsigned int SCR_HEIGHT = 768;
 
 void Mesh::RenderNode(MeshData* pMesh)
 {
+    glCullFace(GL_BACK);
+    glUseProgram(pMesh->m_Shader->ID);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, pMesh->m_Tex);
-    glUseProgram(pMesh->m_Shader->ID);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, pMesh->m_Tex1);
 
     glBindVertexArray(pMesh->m_VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pMesh->m_IBO);
@@ -110,14 +98,14 @@ void Mesh::RenderNode(MeshData* pMesh)
     glm::mat4 model;
     glm::mat4 view;
     glm::mat4 projection;
-    model = glm::rotate(model, 0.f, glm::vec3(0.5f, 1.0f, 0.0f));
-    view  = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
     projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-    unsigned int modelLoc = glGetUniformLocation(pMesh->m_Shader->ID, "model");
-    unsigned int viewLoc  = glGetUniformLocation(pMesh->m_Shader->ID, "view");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+    pMesh->m_Shader->setMat4("model", model);
+    pMesh->m_Shader->setMat4("view", view);
     pMesh->m_Shader->setMat4("projection", projection);
+    pMesh->m_Shader->setInt("texture1", 0);
+    pMesh->m_Shader->setInt("texture2", 1);
 
     glDrawElements(GL_TRIANGLES, pMesh->m_IndiceSize, GL_UNSIGNED_SHORT, 0);
 
