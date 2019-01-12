@@ -6,11 +6,14 @@
 #include "runtime/model/model.h"
 #include "learnopengl/camera.h"
 #include "runtime/util.h"
+#include "vertdata.h"
+
+#define POST_PROCESS1
 
 App::App()
 {
     m_View = new GLView();
-    m_Camera = new Camera();
+    m_Camera = new Camera(glm::vec3(0.0f, 0.0f, 5.0f));
 }
 
 App::~App()
@@ -22,77 +25,101 @@ App::~App()
 Shader* shader = nullptr;
 unsigned int VBO, IBO, VAO;
 
-CModel* pModel = nullptr;
+#ifdef POST_PROCESS
 
-float vertices[] = {
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-    0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-    0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+unsigned int framebuffer;
+unsigned int intermediateFBO;
+unsigned int quadVAO, quadVBO;
+Shader* screenShader;
+unsigned int screenTexture;
 
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-    0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-    0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-}; 
-
-unsigned short indice[] = 
-{
-    0, 1, 2, 3, 4, 5,
-    6, 7, 8, 9, 10, 11,
-    12, 13, 14, 15, 16, 17,
-    18, 19, 20, 21, 22, 23,
-    24, 25, 26, 27, 28, 29,
-    30, 31, 32, 33, 34, 35,
-};
+#endif
 
 void App::Init(int screen_width, int screen_height)
 {
+    SCR_WIDTH = screen_width;
+    SCR_HEIGHT = screen_height;
     m_View->init();
     m_View->createWindow(screen_width, screen_height);
 
-    pModel = new CModel();
+#ifdef POST_PROCESS
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    // create a multisampled color attachment texture
+    unsigned int textureColorBufferMultiSampled;
+    glGenTextures(1, &textureColorBufferMultiSampled);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureColorBufferMultiSampled);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, SCR_WIDTH, SCR_HEIGHT, GL_TRUE);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, textureColorBufferMultiSampled, 0);
+    // create a (also multisampled) renderbuffer object for depth and stencil attachments
+    unsigned int rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        exit(0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // configure second post-processing framebuffer
+    glGenFramebuffers(1, &intermediateFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, intermediateFBO);
+    // create a color attachment texture
+    glGenTextures(1, &screenTexture);
+    glBindTexture(GL_TEXTURE_2D, screenTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);	// we only need a color buffer
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        exit(0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(VertData::quadVertices), VertData::quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+    screenShader = new Shader("assets/post.vert", "assets/post.frag");
+#endif
+
+    CModel* pModel = new CModel();
     pModel->m_Mesh = new Mesh();
     MeshData* meshData = new MeshData();
     meshData->CreateShader("assets/shader_1.vert", "assets/shader_1.frag");
-    meshData->SetVertex(vertices, 36, 5);
-    meshData->SetIndice(indice, 36);
+    meshData->SetVertex(VertData::vertices, 36, 8);
+    meshData->SetIndice(VertData::indice, 36);
+    meshData->m_Tex = Util::LoadTexture("textures/container2.png");
+    meshData->m_Tex1 = Util::LoadTexture("textures/container2_specular.png");
+    meshData->Initialize();
+    meshData->m_Pos = glm::vec3(0, 0, 0);
+    pModel->m_Mesh->m_Roots.push_back(meshData);
+    m_Models.push_back(pModel);
+
+    //light
+
+    pModel = new CModel();
+    pModel->m_Mesh = new Mesh();
+    meshData = new MeshData();
+    meshData->CreateShader("assets/light.vert", "assets/light.frag");
+    meshData->SetVertex(VertData::verticesLight, 36, 3);
+    meshData->SetIndice(VertData::indice, 36);
     meshData->m_Tex = Util::LoadTexture("textures/container.jpg");
     meshData->m_Tex1 = Util::LoadTexture("textures/awesomeface.png");
     meshData->Initialize();
+    meshData->m_Pos = glm::vec3(-5, 5, -5);
     pModel->m_Mesh->m_Roots.push_back(meshData);
+    m_Models.push_back(pModel);
 }
 
 void App::Update()
@@ -113,13 +140,32 @@ bool App::OnShouldClose()
 
 void App::BeginRender()
 {
+#ifdef POST_PROCESS
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+#endif
     glClearColor(0, 0, 0, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void App::EndRender()
 {
+#ifdef POST_PROCESS
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
+    glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+
+    screenShader->use();
+    screenShader->setInt("screenTexture", 0);
+    glBindVertexArray(quadVAO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, screenTexture); // use the now resolved color attachment as the quad's texture
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+#endif
     m_View->swapBuffers();
 }
 
@@ -127,7 +173,10 @@ void App::OnRender()
 {
     BeginRender();
 
-    pModel->Render();
+    for (int i = 0; i < m_Models.size(); ++i)
+    {
+        m_Models[i]->Render();
+    }
 
     EndRender();
 }

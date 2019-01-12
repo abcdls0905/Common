@@ -3,12 +3,15 @@
 #include <stb_image.h>
 #include <learnopengl/filesystem.h>
 
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include "runtime/util.h"
+#include "app.h"
 
+MeshData::MeshData()
+{
+    m_Pos = glm::vec3(0, 0, 0);
+    m_Rot = glm::vec3(0, 0, 0);
+    m_Scale = glm::vec3(1, 1, 1);
+}
 
 MeshData::~MeshData(){
     glDeleteVertexArrays(1, &m_VAO);
@@ -44,10 +47,12 @@ void MeshData::Initialize()
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_VertexSize * m_ElemSize, m_Vertex, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, m_ElemSize * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, m_ElemSize * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, m_ElemSize * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     glGenBuffers(1, &m_IBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
@@ -59,7 +64,6 @@ void MeshData::InitTexture(const char* path)
 {
     m_Tex = Util::LoadTexture(path);
 }
-
 
 void Mesh::Render()
 {
@@ -86,6 +90,7 @@ const unsigned int SCR_HEIGHT = 768;
 void Mesh::RenderNode(MeshData* pMesh)
 {
     glCullFace(GL_BACK);
+    glEnable(GL_DEPTH);
     glUseProgram(pMesh->m_Shader->ID);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, pMesh->m_Tex);
@@ -98,14 +103,28 @@ void Mesh::RenderNode(MeshData* pMesh)
     glm::mat4 model;
     glm::mat4 view;
     glm::mat4 projection;
-    model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    model = glm::translate(model, pMesh->m_Pos);
+    model = glm::rotate(model, 0.0f, glm::vec3(0.5f, 1.0f, 0.0f));
+    view = App::Inst().m_Camera->GetViewMatrix();
     projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     pMesh->m_Shader->setMat4("model", model);
     pMesh->m_Shader->setMat4("view", view);
     pMesh->m_Shader->setMat4("projection", projection);
-    pMesh->m_Shader->setInt("texture1", 0);
-    pMesh->m_Shader->setInt("texture2", 1);
+    pMesh->m_Shader->setInt("material.diffuse", 0);
+    pMesh->m_Shader->setInt("material.specular", 1);
+
+    glm::vec3 lightPos(-5, 5, -5);
+    Camera& camera = *App::Inst().m_Camera;
+    pMesh->m_Shader->setVec3("light.direction", -0.2f, -1.0f, -0.3f);
+    pMesh->m_Shader->setVec3("viewPos", camera.Position);
+
+    // light properties
+    pMesh->m_Shader->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+    pMesh->m_Shader->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+    pMesh->m_Shader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+    // material properties
+    pMesh->m_Shader->setFloat("material.shininess", 32);
 
     glDrawElements(GL_TRIANGLES, pMesh->m_IndiceSize, GL_UNSIGNED_SHORT, 0);
 

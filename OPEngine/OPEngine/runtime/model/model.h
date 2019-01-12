@@ -2,6 +2,10 @@
 #pragma once
 #include <vector>
 #include "runtime/render/shader/shader.h"
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 class MeshData
 {
@@ -18,8 +22,13 @@ public:
     unsigned int m_Tex;
     unsigned int m_Tex1;
 
+    glm::vec3 m_Pos;
+    glm::vec3 m_Rot;
+    glm::vec3 m_Scale;
+
     std::vector<MeshData*> m_SubMesh;
 public:
+    MeshData();
     ~MeshData();
     void SetVertex(float* v, int size, int eleSize);
     void SetIndice(unsigned short* i, int size);

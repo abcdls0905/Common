@@ -36,6 +36,8 @@
     <ClInclude Include="runtime\util.h">
       <Filter>runtime</Filter>
     </ClInclude>
+    <ClInclude Include="runtime\math.h" />
+    <ClInclude Include="vertdata.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="runtime">

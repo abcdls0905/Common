@@ -88,12 +88,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h" />
+    <ClInclude Include="runtime\math.h" />
     <ClInclude Include="runtime\model\model.h" />
     <ClInclude Include="runtime\platform\gl\glview.h" />
     <ClInclude Include="runtime\platform\platform.h" />
     <ClInclude Include="runtime\platform\view.h" />
     <ClInclude Include="runtime\render\shader\shader.h" />
     <ClInclude Include="runtime\util.h" />
+    <ClInclude Include="vertdata.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
