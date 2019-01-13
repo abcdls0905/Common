@@ -149,7 +149,7 @@ void App::Init(int screen_width, int screen_height)
     pModel = new CModel();
     pModel->m_Mesh = new Mesh();
     meshData = new MeshData();
-    meshData->CreateShader("assets/texture.vert", "assets/texture.frag");
+    meshData->CreateShader("assets/shader_1.vert", "assets/shader_1.frag");
     meshData->SetVertex(VertData::planeVertices, 6, 8);
     meshData->SetIndice(VertData::planeIndice, 6);
     meshData->m_Tex = Util::LoadTexture("textures/wood.png");
