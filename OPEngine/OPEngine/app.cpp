@@ -8,7 +8,7 @@
 #include "runtime/util.h"
 #include "vertdata.h"
 
-#define POST_PROCESS1
+#define POST_PROCESS
 
 App::App()
 {
@@ -93,9 +93,17 @@ void App::Init(int screen_width, int screen_height)
     screenShader = new Shader("assets/post.vert", "assets/post.frag");
 #endif
 
-    CModel* pModel = new CModel();
+    //skybox
+    m_SkyBox = new SkyBox();
+    m_SkyBox->Initialize();
+
+    CModel* pModel = nullptr;
+    MeshData* meshData = nullptr;
+
+    //box
+    pModel = new CModel();
     pModel->m_Mesh = new Mesh();
-    MeshData* meshData = new MeshData();
+    meshData = new MeshData();
     meshData->CreateShader("assets/shader_1.vert", "assets/shader_1.frag");
     meshData->SetVertex(VertData::vertices, 36, 8);
     meshData->SetIndice(VertData::indice, 36);
@@ -106,20 +114,34 @@ void App::Init(int screen_width, int screen_height)
     pModel->m_Mesh->m_Roots.push_back(meshData);
     m_Models.push_back(pModel);
 
-    //light
-
+    //plane
     pModel = new CModel();
     pModel->m_Mesh = new Mesh();
     meshData = new MeshData();
-    meshData->CreateShader("assets/light.vert", "assets/light.frag");
-    meshData->SetVertex(VertData::verticesLight, 36, 3);
-    meshData->SetIndice(VertData::indice, 36);
-    meshData->m_Tex = Util::LoadTexture("textures/container.jpg");
-    meshData->m_Tex1 = Util::LoadTexture("textures/awesomeface.png");
+    meshData->CreateShader("assets/texture.vert", "assets/texture.frag");
+    meshData->SetVertex(VertData::planeVertices, 6, 8);
+    meshData->SetIndice(VertData::planeIndice, 6);
+    meshData->m_Tex = Util::LoadTexture("textures/wood.png");
     meshData->Initialize();
-    meshData->m_Pos = glm::vec3(-5, 5, -5);
+    meshData->m_Pos = glm::vec3(0, 0, 0);
     pModel->m_Mesh->m_Roots.push_back(meshData);
     m_Models.push_back(pModel);
+
+    //refract
+    pModel = new CModel();
+    pModel->m_Mesh = new Mesh();
+    meshData = new MeshData();
+    meshData->CreateShader("assets/cubemap.vert", "assets/cubemap.frag");
+    meshData->SetVertex(VertData::cubeVertices, 36, 6);
+    meshData->SetIndice(VertData::indice, 36);
+    meshData->m_Tex = Util::loadCubemap();
+    meshData->m_Tex1 = Util::LoadTexture("textures/container2.png");
+    meshData->Initialize();
+    meshData->m_Pos = glm::vec3(-3, 0, 0);
+    meshData->m_IsCube = true;
+    pModel->m_Mesh->m_Roots.push_back(meshData);
+    m_Models.push_back(pModel);
+
 }
 
 void App::Update()
@@ -144,7 +166,7 @@ void App::BeginRender()
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 #endif
     glClearColor(0, 0, 0, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
     glClear(GL_DEPTH_BUFFER_BIT);
 }
 
@@ -169,14 +191,20 @@ void App::EndRender()
     m_View->swapBuffers();
 }
 
-void App::OnRender()
+void App::NormalRender()
 {
-    BeginRender();
-
     for (int i = 0; i < m_Models.size(); ++i)
     {
         m_Models[i]->Render();
     }
+    m_SkyBox->Render();
+}
+
+void App::OnRender()
+{
+    BeginRender();
+    
+    NormalRender();
 
     EndRender();
 }

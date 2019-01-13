@@ -4,6 +4,7 @@
 class View;
 #include "learnopengl/camera.h"
 #include "runtime/model/model.h"
+#include "runtime/skybox.h"
 #include <vector>
 
 class App
@@ -12,6 +13,7 @@ public:
     View* m_View;
     Camera* m_Camera;
     std::vector<CModel*> m_Models;
+    SkyBox* m_SkyBox;
     float SCR_WIDTH;
     float SCR_HEIGHT;
 public:
@@ -22,6 +24,7 @@ public:
     void OnFrame();
     bool OnShouldClose();
     void BeginRender();
+    void NormalRender();
     void OnRender();
     void EndRender();
     void Shutdown();

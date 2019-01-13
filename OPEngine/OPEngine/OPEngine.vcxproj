@@ -84,6 +84,7 @@
     <ClCompile Include="runtime\model\model.cpp" />
     <ClCompile Include="runtime\platform\gl\glview.cpp" />
     <ClCompile Include="runtime\platform\view.cpp" />
+    <ClCompile Include="runtime\skybox.cpp" />
     <ClCompile Include="runtime\util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -94,6 +95,7 @@
     <ClInclude Include="runtime\platform\platform.h" />
     <ClInclude Include="runtime\platform\view.h" />
     <ClInclude Include="runtime\render\shader\shader.h" />
+    <ClInclude Include="runtime\skybox.h" />
     <ClInclude Include="runtime\util.h" />
     <ClInclude Include="vertdata.h" />
   </ItemGroup>

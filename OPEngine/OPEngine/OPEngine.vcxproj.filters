@@ -15,6 +15,9 @@
     <ClCompile Include="runtime\util.cpp">
       <Filter>runtime</Filter>
     </ClCompile>
+    <ClCompile Include="runtime\skybox.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h" />
@@ -38,6 +41,9 @@
     </ClInclude>
     <ClInclude Include="runtime\math.h" />
     <ClInclude Include="vertdata.h" />
+    <ClInclude Include="runtime\skybox.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="runtime">

@@ -11,6 +11,7 @@ MeshData::MeshData()
     m_Pos = glm::vec3(0, 0, 0);
     m_Rot = glm::vec3(0, 0, 0);
     m_Scale = glm::vec3(1, 1, 1);
+    m_IsCube = false;
 }
 
 MeshData::~MeshData(){
@@ -36,9 +37,6 @@ void MeshData::CreateShader(const char* vert, const char* frag)
 
 void MeshData::Initialize()
 {
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-
     glGenVertexArrays(1, &m_VAO);
     glGenBuffers(1, &m_VBO);
 
@@ -89,11 +87,14 @@ const unsigned int SCR_HEIGHT = 768;
 
 void Mesh::RenderNode(MeshData* pMesh)
 {
-    glCullFace(GL_BACK);
-    glEnable(GL_DEPTH);
-    glUseProgram(pMesh->m_Shader->ID);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    pMesh->m_Shader->use();
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, pMesh->m_Tex);
+    if (pMesh->m_IsCube)
+        glBindTexture(GL_TEXTURE_CUBE_MAP, pMesh->m_Tex);
+    else
+        glBindTexture(GL_TEXTURE_2D, pMesh->m_Tex);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, pMesh->m_Tex1);
 
@@ -112,11 +113,13 @@ void Mesh::RenderNode(MeshData* pMesh)
     pMesh->m_Shader->setMat4("projection", projection);
     pMesh->m_Shader->setInt("material.diffuse", 0);
     pMesh->m_Shader->setInt("material.specular", 1);
+    pMesh->m_Shader->setInt("skybox", 0);
+    pMesh->m_Shader->setInt("texture1", 0);
 
-    glm::vec3 lightPos(-5, 5, -5);
     Camera& camera = *App::Inst().m_Camera;
     pMesh->m_Shader->setVec3("light.direction", -0.2f, -1.0f, -0.3f);
     pMesh->m_Shader->setVec3("viewPos", camera.Position);
+    pMesh->m_Shader->setVec3("cameraPos", camera.Position);
 
     // light properties
     pMesh->m_Shader->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
