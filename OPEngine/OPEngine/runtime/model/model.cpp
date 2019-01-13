@@ -87,6 +87,10 @@ const unsigned int SCR_HEIGHT = 768;
 
 void Mesh::RenderNode(MeshData* pMesh)
 {
+    Shader* useShader = pMesh->m_Shader;
+    bool isRenderDepth = App::Inst().IsRenderDepth();
+    if (isRenderDepth)
+        useShader = App::Inst().simpleDepthShader;
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     pMesh->m_Shader->use();
@@ -97,6 +101,8 @@ void Mesh::RenderNode(MeshData* pMesh)
         glBindTexture(GL_TEXTURE_2D, pMesh->m_Tex);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, pMesh->m_Tex1);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, pMesh->m_TexShadow);
 
     glBindVertexArray(pMesh->m_VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pMesh->m_IBO);
@@ -108,26 +114,36 @@ void Mesh::RenderNode(MeshData* pMesh)
     model = glm::rotate(model, 0.0f, glm::vec3(0.5f, 1.0f, 0.0f));
     view = App::Inst().m_Camera->GetViewMatrix();
     projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-    pMesh->m_Shader->setMat4("model", model);
-    pMesh->m_Shader->setMat4("view", view);
-    pMesh->m_Shader->setMat4("projection", projection);
-    pMesh->m_Shader->setInt("material.diffuse", 0);
-    pMesh->m_Shader->setInt("material.specular", 1);
-    pMesh->m_Shader->setInt("skybox", 0);
-    pMesh->m_Shader->setInt("texture1", 0);
+    useShader->setMat4("model", model);
+    useShader->setMat4("view", view);
+    useShader->setMat4("projection", projection);
+    useShader->setInt("material.diffuse", 0);
+    useShader->setInt("material.specular", 1);
+    useShader->setInt("material.shadow", 2);
+    useShader->setInt("skybox", 0);
+    useShader->setInt("texture1", 0);
 
     Camera& camera = *App::Inst().m_Camera;
-    pMesh->m_Shader->setVec3("light.direction", -0.2f, -1.0f, -0.3f);
-    pMesh->m_Shader->setVec3("viewPos", camera.Position);
-    pMesh->m_Shader->setVec3("cameraPos", camera.Position);
+    useShader->setVec3("light.direction", -0.2f, -1.0f, -0.3f);
+    useShader->setVec3("viewPos", camera.Position);
+    useShader->setVec3("cameraPos", camera.Position);
 
     // light properties
-    pMesh->m_Shader->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-    pMesh->m_Shader->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-    pMesh->m_Shader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+    useShader->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+    useShader->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+    useShader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+    glm::vec3 lightPos(-2.0f, 8.0f, -5.0f);
+    glm::mat4 lightProjection, lightView;
+    glm::mat4 lightSpaceMatrix;
+    float near_plane = 1.0f, far_plane = 200.f;
+    lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+    lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+    lightSpaceMatrix = lightProjection * lightView;
+    useShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
     // material properties
-    pMesh->m_Shader->setFloat("material.shininess", 32);
+    useShader->setFloat("material.shininess", 32);
 
     glDrawElements(GL_TRIANGLES, pMesh->m_IndiceSize, GL_UNSIGNED_SHORT, 0);
 

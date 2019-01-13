@@ -2,18 +2,21 @@
 #include "app.h"
 
 #include "runtime/platform/platform.h"
-#include "runtime/render/shader/shader.h"
 #include "runtime/model/model.h"
 #include "learnopengl/camera.h"
 #include "runtime/util.h"
 #include "vertdata.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
-#define POST_PROCESS
+#define POST_PROCESS1
+#define SHADOWMAP
 
 App::App()
 {
     m_View = new GLView();
     m_Camera = new Camera(glm::vec3(0.0f, 0.0f, 5.0f));
+    m_IsRenderDepth = false;
 }
 
 App::~App()
@@ -32,6 +35,15 @@ unsigned int intermediateFBO;
 unsigned int quadVAO, quadVBO;
 Shader* screenShader;
 unsigned int screenTexture;
+
+#endif
+
+#ifdef SHADOWMAP
+
+unsigned int depthMap;
+unsigned int depthMapFBO;
+Shader* debugDepthQuad;
+float near_plane = 1.0f, far_plane = 200.f;
 
 #endif
 
@@ -93,6 +105,24 @@ void App::Init(int screen_width, int screen_height)
     screenShader = new Shader("assets/post.vert", "assets/post.frag");
 #endif
 
+#ifdef SHADOWMAP
+    glGenFramebuffers(1, &depthMapFBO);
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    simpleDepthShader = new Shader("assets/depth.vert", "assets/depth.frag");
+    debugDepthQuad = new Shader("assets/debug_depth.vert", "assets/debug_depth.frag");
+#endif
     //skybox
     m_SkyBox = new SkyBox();
     m_SkyBox->Initialize();
@@ -109,6 +139,7 @@ void App::Init(int screen_width, int screen_height)
     meshData->SetIndice(VertData::indice, 36);
     meshData->m_Tex = Util::LoadTexture("textures/container2.png");
     meshData->m_Tex1 = Util::LoadTexture("textures/container2_specular.png");
+    meshData->m_TexShadow = depthMap;
     meshData->Initialize();
     meshData->m_Pos = glm::vec3(0, 0, 0);
     pModel->m_Mesh->m_Roots.push_back(meshData);
@@ -122,6 +153,7 @@ void App::Init(int screen_width, int screen_height)
     meshData->SetVertex(VertData::planeVertices, 6, 8);
     meshData->SetIndice(VertData::planeIndice, 6);
     meshData->m_Tex = Util::LoadTexture("textures/wood.png");
+    meshData->m_TexShadow = depthMap;
     meshData->Initialize();
     meshData->m_Pos = glm::vec3(0, 0, 0);
     pModel->m_Mesh->m_Roots.push_back(meshData);
@@ -136,6 +168,7 @@ void App::Init(int screen_width, int screen_height)
     meshData->SetIndice(VertData::indice, 36);
     meshData->m_Tex = Util::loadCubemap();
     meshData->m_Tex1 = Util::LoadTexture("textures/container2.png");
+    meshData->m_TexShadow = depthMap;
     meshData->Initialize();
     meshData->m_Pos = glm::vec3(-3, 0, 0);
     meshData->m_IsCube = true;
@@ -149,6 +182,35 @@ void App::Update()
     OnFrame();
     OnRender();
     m_View->pollEvents();
+}
+
+unsigned int quadVAO = 0;
+unsigned int quadVBO;
+void renderQuad()
+{
+    if (quadVAO == 0)
+    {
+        float quadVertices[] = {
+            // positions        // texture Coords
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+            1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+            1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+        // setup plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    }
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
 }
 
 void App::OnFrame()
@@ -168,6 +230,24 @@ void App::BeginRender()
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     glClear(GL_DEPTH_BUFFER_BIT);
+
+#ifdef SHADOWMAP
+    glm::mat4 lightProjection, lightView;
+    glm::mat4 lightSpaceMatrix;
+    glm::vec3 lightPos(-2.0f, 8.0f, -5.0f);
+    lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+    lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+    lightSpaceMatrix = lightProjection * lightView;
+    simpleDepthShader->use();
+    simpleDepthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    m_IsRenderDepth = true;
+    NormalRender();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#endif
 }
 
 void App::EndRender()
@@ -188,6 +268,17 @@ void App::EndRender()
     glBindTexture(GL_TEXTURE_2D, screenTexture); // use the now resolved color attachment as the quad's texture
     glDrawArrays(GL_TRIANGLES, 0, 6);
 #endif
+
+#ifdef SHADOWMAP1
+
+    debugDepthQuad->use();
+    debugDepthQuad->setFloat("near_plane", near_plane);
+    debugDepthQuad->setFloat("far_plane", far_plane);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    renderQuad();
+#endif
+
     m_View->swapBuffers();
 }
 
@@ -203,7 +294,8 @@ void App::NormalRender()
 void App::OnRender()
 {
     BeginRender();
-    
+
+    m_IsRenderDepth = false;
     NormalRender();
 
     EndRender();

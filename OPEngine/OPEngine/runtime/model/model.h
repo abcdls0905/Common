@@ -21,6 +21,7 @@ public:
     unsigned int m_IBO;
     unsigned int m_Tex;
     unsigned int m_Tex1;
+    unsigned int m_TexShadow;
     bool m_IsCube;
 
     glm::vec3 m_Pos;
