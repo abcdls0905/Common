@@ -34,9 +34,6 @@ public:
     bool OnMsg(unsigned int msg, size_t param1, size_t param2, int& result);
     void OnInput(const char* utf8);
     bool IsRenderDepth(){return m_IsRenderDepth;}
-    static App& Inst()
-    {
-        static App app;
-        return app;
-    }
+    static App* Inst();
+    static App* m_Inst;
 };

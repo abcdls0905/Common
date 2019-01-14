@@ -84,7 +84,7 @@ const unsigned int SCR_HEIGHT = 768;
 
 void SkyBox::Render()
 {
-    Camera& camera = *App::Inst().m_Camera;
+    Camera& camera = *App::Inst()->m_Camera;
     glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
     skyboxShader->use();
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);

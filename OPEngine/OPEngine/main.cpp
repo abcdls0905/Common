@@ -6,11 +6,11 @@ const unsigned int SCR_HEIGHT = 768;
 
 int main()
 {
-    App app = App::Inst();
-    app.Init(SCR_WIDTH, SCR_HEIGHT);
-    while(!app.OnShouldClose())
+    App* app = App::Inst();
+    app->Init(SCR_WIDTH, SCR_HEIGHT);
+    while(!app->OnShouldClose())
     {
-        app.Update();
+        app->Update();
     }
     return 0;
 }

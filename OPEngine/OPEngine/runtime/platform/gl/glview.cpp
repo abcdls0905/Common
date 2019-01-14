@@ -66,7 +66,7 @@ void GLView::createWindow(int w, int h)
 
 void processInput_(GLFWwindow *window)
 {
-    Camera& camera = *App::Inst().m_Camera;
+    Camera& camera = *App::Inst()->m_Camera;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     float deltaTime = 0.0026f;
@@ -118,7 +118,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
 
-    Camera& camera = *App::Inst().m_Camera;
+    Camera& camera = *App::Inst()->m_Camera;
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -140,6 +140,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    Camera& camera = *App::Inst().m_Camera;
+    Camera& camera = *App::Inst()->m_Camera;
     camera.ProcessMouseScroll(yoffset);
 }
