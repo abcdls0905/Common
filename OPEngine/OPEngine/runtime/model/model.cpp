@@ -104,6 +104,8 @@ void Mesh::RenderNode(MeshData* pMesh)
     glBindTexture(GL_TEXTURE_2D, pMesh->m_Tex1);
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, pMesh->m_TexShadow);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, pMesh->m_TexShadow1);
 
     glBindVertexArray(pMesh->m_VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pMesh->m_IBO);
@@ -123,8 +125,19 @@ void Mesh::RenderNode(MeshData* pMesh)
     useShader->setInt("material.diffuse", 0);
     useShader->setInt("material.specular", 1);
     useShader->setInt("material.shadow", 2);
+    useShader->setInt("material.shadowback", 3);
     useShader->setInt("skybox", 0);
     useShader->setInt("texture1", 0);
+
+    //light point
+    glm::vec3 light_point_pos(-1.5f, 0.5f, 0);
+    glm::vec3 light_front(-1.5f, 0.5f, 1.f);
+    glm::mat4 light_point_view = glm::lookAt(light_point_pos, light_front, glm::vec3(0.0, 1.0, 0.0));
+    useShader->setFloat("near", app->near_plane);
+    useShader->setFloat("far", app->far_plane);
+    useShader->setFloat("dir", app->m_IsFront?1:-1);
+    useShader->setMat4("worldview", light_point_view);
+    useShader->setVec3("light_World_Pos", light_point_pos);
 
     Camera& camera = *app->m_Camera;
     useShader->setVec3("light.direction", -0.2f, -1.0f, -0.3f);
@@ -139,8 +152,7 @@ void Mesh::RenderNode(MeshData* pMesh)
     glm::vec3 lightPos(-2.0f, 8.0f, -5.0f);
     glm::mat4 lightProjection, lightView;
     glm::mat4 lightSpaceMatrix;
-    float near_plane = 1.0f, far_plane = 15;
-    lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+    lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, app->near_plane, app->far_plane);
     lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
     lightSpaceMatrix = lightProjection * lightView;
     useShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);

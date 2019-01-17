@@ -19,6 +19,9 @@ public:
     float SCR_HEIGHT;
     Shader* simpleDepthShader;
     bool m_IsRenderDepth;
+    bool m_IsFront;
+    float near_plane;
+    float far_plane;
 public:
     App();
     ~App();

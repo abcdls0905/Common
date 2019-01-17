@@ -50,9 +50,10 @@ unsigned int screenTexture;
 #ifdef SHADOWMAP
 
 unsigned int depthMap;
+unsigned int depthMap1;
 unsigned int depthMapFBO;
+unsigned int depthMapFBO1;
 Shader* debugDepthQuad;
-float near_plane = 1.0f, far_plane = 15;
 
 #endif
 
@@ -60,6 +61,9 @@ void App::Init(int screen_width, int screen_height)
 {
     SCR_WIDTH = screen_width;
     SCR_HEIGHT = screen_height;
+    m_IsFront = false;
+    near_plane  = 0.1f;
+    far_plane= 15.0f;
     m_View->init();
     m_View->createWindow(screen_width, screen_height);
 
@@ -131,11 +135,25 @@ void App::Init(int screen_width, int screen_height)
 
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+
+    glGenFramebuffers(1, &depthMapFBO1);
+    glGenTextures(1, &depthMap1);
+    glBindTexture(GL_TEXTURE_2D, depthMap1);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO1);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap1, 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    simpleDepthShader = new Shader("assets/depth.vert", "assets/depth.frag");
+    simpleDepthShader = new Shader("assets/dpdepth.vert", "assets/dpdepth.frag");
     debugDepthQuad = new Shader("assets/debug_depth.vert", "assets/debug_depth.frag");
 #endif
     //skybox
@@ -155,6 +173,7 @@ void App::Init(int screen_width, int screen_height)
     meshData->m_Tex = Util::LoadTexture("textures/container2.png");
     meshData->m_Tex1 = Util::LoadTexture("textures/container2_specular.png");
     meshData->m_TexShadow = depthMap;
+    meshData->m_TexShadow1 = depthMap1;
     meshData->Initialize();
     meshData->m_Pos = glm::vec3(0, 0, 0);
     pModel->m_Mesh->m_Roots.push_back(meshData);
@@ -169,6 +188,7 @@ void App::Init(int screen_width, int screen_height)
     meshData->m_Tex = Util::LoadTexture("textures/container2.png");
     meshData->m_Tex1 = Util::LoadTexture("textures/container2_specular.png");
     meshData->m_TexShadow = depthMap;
+    meshData->m_TexShadow1 = depthMap1;
     meshData->Initialize();
     meshData->m_Pos = glm::vec3(-1.0, 2, -1.5);
     pModel->m_Mesh->m_Roots.push_back(meshData);
@@ -183,6 +203,7 @@ void App::Init(int screen_width, int screen_height)
     meshData->SetIndice(VertData::planeIndice, 6);
     meshData->m_Tex = Util::LoadTexture("textures/wood.png");
     meshData->m_TexShadow = depthMap;
+    meshData->m_TexShadow1 = depthMap1;
     meshData->Initialize();
     meshData->m_Pos = glm::vec3(0, 0, 0);
     pModel->m_Mesh->m_Roots.push_back(meshData);
@@ -198,6 +219,7 @@ void App::Init(int screen_width, int screen_height)
     meshData->m_Tex = Util::loadCubemap();
     meshData->m_Tex1 = Util::LoadTexture("textures/container2.png");
     meshData->m_TexShadow = depthMap;
+    meshData->m_TexShadow1 = depthMap1;
     meshData->Initialize();
     meshData->m_Pos = glm::vec3(-3, 0, 0);
     meshData->m_IsCube = true;
@@ -263,6 +285,14 @@ void App::BeginRender()
 #ifdef SHADOWMAP
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
     glClear(GL_DEPTH_BUFFER_BIT);
+    m_IsRenderDepth = true;
+    m_IsFront = true;
+    NormalRender();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO1);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    m_IsFront = false;
     m_IsRenderDepth = true;
     NormalRender();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
