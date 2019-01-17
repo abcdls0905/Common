@@ -12,6 +12,8 @@
 #define POST_PROCESS1
 #define SHADOWMAP
 
+const int SHADOWMAPSIZE = 512;
+
 App* App::m_Inst = nullptr;
 
 App* App::Inst()
@@ -122,7 +124,7 @@ void App::Init(int screen_width, int screen_height)
     glGenFramebuffers(1, &depthMapFBO);
     glGenTextures(1, &depthMap);
     glBindTexture(GL_TEXTURE_2D, depthMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOWMAPSIZE, SHADOWMAPSIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 //     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -139,7 +141,7 @@ void App::Init(int screen_width, int screen_height)
     glGenFramebuffers(1, &depthMapFBO1);
     glGenTextures(1, &depthMap1);
     glBindTexture(GL_TEXTURE_2D, depthMap1);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOWMAPSIZE, SHADOWMAPSIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -283,6 +285,7 @@ void App::BeginRender()
     glClear(GL_DEPTH_BUFFER_BIT);
 
 #ifdef SHADOWMAP
+    glViewport(0, 0, SHADOWMAPSIZE, SHADOWMAPSIZE);
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
     glClear(GL_DEPTH_BUFFER_BIT);
     m_IsRenderDepth = true;
@@ -296,6 +299,7 @@ void App::BeginRender()
     m_IsRenderDepth = true;
     NormalRender();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 #endif
 }
 

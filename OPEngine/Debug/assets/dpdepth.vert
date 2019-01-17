@@ -24,7 +24,7 @@ void main()
 
 	pos /= fLength;
 	clipDepth = pos.z;
-	 	
+
 	pos.x /= (pos.z + 1.0f);
 	pos.y /= (pos.z + 1.0f);
 
