@@ -4,7 +4,8 @@ out vec4 FragColor;
 struct Material {
     sampler2D diffuse;
     sampler2D specular;   
-	sampler2D shadow;
+    sampler2D shadow;
+	sampler2D shadowback;
     float shininess;
 }; 
 
@@ -25,6 +26,12 @@ in vec4 FragPosLightSpace;
 uniform vec3 viewPos;
 uniform Material material;
 uniform Light light;
+
+//point light
+uniform vec3 light_World_Pos;
+uniform mat4 worldview; 
+uniform float near;
+uniform float far;
 
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
@@ -50,7 +57,7 @@ float ShadowCalculation(vec4 fragPosLightSpace)
         for(int y = -1; y <= 1; ++y)
         {
             float pcfDepth = texture(material.shadow, projCoords.xy + vec2(x, y) * texelSize).r; 
-            shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
+            shadow += currentDepth - bias > pcfDepth  ? 0.0 : 1.0;        
         }    
     }
     shadow /= 9.0;
@@ -60,6 +67,31 @@ float ShadowCalculation(vec4 fragPosLightSpace)
         shadow = 0.0;
         
     return shadow;
+}
+
+float CalcPointLight()
+{
+    vec3 vPosDP = light_World_Pos - FragPos;
+    //vec3 vPosDP = -(worldview * vec4(FragPos, 1)).xyz;
+    float fLength = length(vPosDP);
+    vPosDP /= fLength;
+    float fDPDepth = 0;
+    float fSceneDepth = (fLength - near) / (far - near);
+    if(vPosDP.z >= 0.0f)
+    {      
+        vec2 vTexFront = vec2(0, 0);
+        vTexFront.x = (vPosDP.x / (1.0f + vPosDP.z)) * 0.5f + 0.5f;
+        vTexFront.y = 1.0f - ((vPosDP.y / (1.0f + vPosDP.z)) * 0.5f + 0.5f);     
+        fDPDepth = texture(material.shadow, vTexFront).r;     
+    }
+    else
+    {     
+        vec2 vTexBack = vec2(0, 0);
+        vTexBack.x = (vPosDP.x /  (1.0f - vPosDP.z)) * 0.5f + 0.5f; 
+        vTexBack.y = 1.0f - ((vPosDP.y /  (1.0f - vPosDP.z)) * 0.5f + 0.5f); 
+        fDPDepth = texture(material.shadowback, vTexBack).r;   
+    }
+    return fSceneDepth > fDPDepth ? 0.0 : 1.0;
 }
 
 void main()
@@ -80,7 +112,8 @@ void main()
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec3 specular = light.specular * spec * texture(material.specular, TexCoords).rgb;  
         
-    float shadow = ShadowCalculation(FragPosLightSpace);  
-    vec3 result = ambient + (1.0 - shadow) * (diffuse + specular);
+    //float shadow = ShadowCalculation(FragPosLightSpace);  
+    float shadow = CalcPointLight();  
+    vec3 result = ambient + shadow * (diffuse + specular);
     FragColor = vec4(result, 1.0);
 } 
