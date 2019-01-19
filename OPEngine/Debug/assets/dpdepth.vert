@@ -25,11 +25,11 @@ void main()
 	pos /= fLength;
 	clipDepth = pos.z;
 
-	pos.x /= (pos.z + 1.0f);
-	pos.y /= (pos.z + 1.0f);
+	pos.x /= (pos.z + 1.0);
+	pos.y /= (pos.z + 1.0);
 
 	pos.z = (fLength - near) / (far - near);
-	pos.w = 1.0f;
+	pos.w = 1.0;
 	
     gl_Position = pos;
 }
