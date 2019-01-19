@@ -130,12 +130,13 @@ void Mesh::RenderNode(MeshData* pMesh)
     useShader->setInt("texture1", 0);
 
     //light point
+    float dir = app->m_IsFront ? 1 : -1;
     glm::vec3 light_point_pos(-1.5f, 0.5f, 0);
-    glm::vec3 light_front(-1.5f, 0.5f, -1.f);
+    glm::vec3 light_front(-1.5f, 0.5f, dir);
     glm::mat4 light_point_view = glm::lookAt(light_point_pos, light_front, glm::vec3(0.0, 1.0, 0.0));
     useShader->setFloat("near", app->near_plane);
     useShader->setFloat("far", app->far_plane);
-    useShader->setFloat("dir", app->m_IsFront?1:-1);
+    useShader->setFloat("dir", dir);
     useShader->setMat4("worldview", light_point_view);
     useShader->setVec3("light_World_Pos", light_point_pos);
 

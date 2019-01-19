@@ -26,7 +26,7 @@ App* App::Inst()
 App::App()
 {
     m_View = new GLView();
-    m_Camera = new Camera(glm::vec3(0.0f, 0.0f, 5.0f));
+    m_Camera = new Camera(glm::vec3(-1.0f, 3.0f, 3.0f));
     m_IsRenderDepth = false;
 }
 
@@ -64,7 +64,7 @@ void App::Init(int screen_width, int screen_height)
     SCR_WIDTH = screen_width;
     SCR_HEIGHT = screen_height;
     m_IsFront = false;
-    near_plane  = 0.1f;
+    near_plane  = 1.0f;
     far_plane= 15.0f;
     m_View->init();
     m_View->createWindow(screen_width, screen_height);
@@ -177,7 +177,7 @@ void App::Init(int screen_width, int screen_height)
     meshData->m_TexShadow = depthMap;
     meshData->m_TexShadow1 = depthMap1;
     meshData->Initialize();
-    meshData->m_Pos = glm::vec3(0, 0, 0);
+    meshData->m_Pos = glm::vec3(3, 0, 0);
     pModel->m_Mesh->m_Roots.push_back(meshData);
     m_Models.push_back(pModel);
 
@@ -208,6 +208,22 @@ void App::Init(int screen_width, int screen_height)
     meshData->m_TexShadow1 = depthMap1;
     meshData->Initialize();
     meshData->m_Pos = glm::vec3(0, 0, 0);
+    pModel->m_Mesh->m_Roots.push_back(meshData);
+    m_Models.push_back(pModel);
+
+    //point light
+    pModel = new CModel();
+    pModel->m_Mesh = new Mesh();
+    meshData = new MeshData();
+    meshData->CreateShader("assets/shader_1.vert", "assets/shader_1.frag");
+    meshData->SetVertex(VertData::pointLight, 6, 8);
+    meshData->SetIndice(VertData::planeIndice, 6);
+    meshData->m_Tex = Util::LoadTexture("textures/toy_box_normal.png");
+    meshData->m_TexShadow = depthMap;
+    meshData->m_TexShadow1 = depthMap1;
+    meshData->Initialize();
+    //glm::vec3 light_point_pos(-1.5f, 0.5f, 0);
+    meshData->m_Pos = glm::vec3(-1.5f, 0.5f, 0);
     pModel->m_Mesh->m_Roots.push_back(meshData);
     m_Models.push_back(pModel);
 
@@ -327,7 +343,7 @@ void App::EndRender()
     debugDepthQuad->setFloat("near_plane", near_plane);
     debugDepthQuad->setFloat("far_plane", far_plane);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap1);
     debugDepthQuad->setInt("depthMap", 0);
     renderQuad();
 #endif
