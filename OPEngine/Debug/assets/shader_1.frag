@@ -82,22 +82,19 @@ float CalcPointLight()
     {      
         vec2 vTexFront = vec2(0, 0);
         vTexFront.x = (vPosDP.x / (1.0 + vPosDP.z)) * 0.5 + 0.5;
+        vTexFront.x = 1 - vTexFront.x;
         vTexFront.y = 1.0 - ((vPosDP.y / (1.0 + vPosDP.z)) * 0.5 + 0.5);
-        float temp = 0.0;
-        temp += texture(material.shadow, vTexFront).r;
-        temp += texture(material.shadow, vTexFront + vec2(size.x, 0)).r < fSceneDepth ? 0 : 1; 
-        temp += texture(material.shadow, vTexFront + vec2(-size.x, 0)).r < fSceneDepth ? 0 : 1; 
-        temp += texture(material.shadow, vTexFront + vec2(0, size.y)).r < fSceneDepth ? 0 : 1; 
-        temp += texture(material.shadow, vTexFront + vec2(0, -size.y)).r < fSceneDepth ? 0 : 1;
-        fDPDepth = temp * 0.2;
+        fDPDepth = texture(material.shadow, vTexFront).r;
     }
     else
-    {     
+    {
         vec2 vTexBack = vec2(0, 0);
         vTexBack.x = (vPosDP.x /  (1.0 - vPosDP.z)) * 0.5 + 0.5; 
+        vTexBack.x = 1 - vTexBack.x;
         vTexBack.y = 1.0 - ((vPosDP.y /  (1.0 - vPosDP.z)) * 0.5 + 0.5);
         fDPDepth = texture(material.shadowback, vTexBack).r;
     }
+    fDPDepth = fDPDepth * 2 - 1.0;
     return fSceneDepth > fDPDepth ? 0.0 : 1.0;
 }
 
