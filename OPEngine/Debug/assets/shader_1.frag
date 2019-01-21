@@ -77,6 +77,7 @@ float CalcPointLight()
     vPosDP /= fLength;
     float fDPDepth = 0;
     float fSceneDepth = (fLength - near) / (far - near);
+    fSceneDepth = (fSceneDepth + 1.0) / 2.0;
     vec2 size = 1 / textureSize(material.shadow, 0);
     if(vPosDP.z >= 0.0)
     {      
@@ -94,7 +95,6 @@ float CalcPointLight()
         vTexBack.y = 1.0 - ((vPosDP.y /  (1.0 - vPosDP.z)) * 0.5 + 0.5);
         fDPDepth = texture(material.shadowback, vTexBack).r;
     }
-    fDPDepth = fDPDepth * 2 - 1.0;
     return fSceneDepth > fDPDepth ? 0.0 : 1.0;
 }
 

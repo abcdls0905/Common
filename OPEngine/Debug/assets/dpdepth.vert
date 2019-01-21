@@ -31,5 +31,7 @@ void main()
 	pos.z = (fLength - near) / (far - near);
 	pos.w = 1.0;
 	
+	//pos.z = pos.x / 2 + 1.0;
+
     gl_Position = pos;
 }

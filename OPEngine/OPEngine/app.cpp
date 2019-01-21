@@ -156,7 +156,7 @@ void App::Init(int screen_width, int screen_height)
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    simpleDepthShader = new Shader("assets/dpdepth.vert", "assets/dpdepth.frag");
+    simpleDepthShader = new Shader("assets/depth.vert", "assets/depth.frag");
     debugDepthQuad = new Shader("assets/debug_depth.vert", "assets/debug_depth.frag");
 #endif
     //skybox
@@ -365,7 +365,7 @@ void App::EndRender()
     glDrawArrays(GL_TRIANGLES, 0, 6);
 #endif
 
-#ifdef SHADOWMAP1
+#ifdef SHADOWMAP
     debugDepthQuad->use();
     debugDepthQuad->setFloat("near_plane", near_plane);
     debugDepthQuad->setFloat("far_plane", far_plane);
