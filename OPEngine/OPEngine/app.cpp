@@ -64,7 +64,7 @@ void App::Init(int screen_width, int screen_height)
     SCR_WIDTH = screen_width;
     SCR_HEIGHT = screen_height;
     m_IsFront = false;
-    near_plane  = 1.0f;
+    near_plane  = 0.1f;
     far_plane= 15.0f;
     m_View->init();
     m_View->createWindow(screen_width, screen_height);
@@ -156,7 +156,7 @@ void App::Init(int screen_width, int screen_height)
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    simpleDepthShader = new Shader("assets/depth.vert", "assets/depth.frag");
+    simpleDepthShader = new Shader("assets/dpdepth.vert", "assets/dpdepth.frag");
     debugDepthQuad = new Shader("assets/debug_depth.vert", "assets/debug_depth.frag");
 #endif
     //skybox
@@ -178,7 +178,7 @@ void App::Init(int screen_width, int screen_height)
     meshData->m_TexShadow = depthMap;
     meshData->m_TexShadow1 = depthMap1;
     meshData->Initialize();
-    meshData->m_Pos = glm::vec3(6, 0, 0);
+    meshData->m_Pos = glm::vec3(1, 0, 0);
     pModel->m_Mesh->m_Roots.push_back(meshData);
     m_Models.push_back(pModel);
 
@@ -254,23 +254,44 @@ void App::Init(int screen_width, int screen_height)
     pModel->m_Mesh->m_Roots.push_back(meshData);
     //m_Models.push_back(pModel);
 
-    //refract
+    tempShader = new Shader("assets/cubemap.vert", "assets/cubemap.frag");
+    tempTex = Util::loadCubemap();
+    unsigned int tempTex1 = Util::LoadTexture("textures/container2.png");
+
+    for (int i = 0; i < 30; i++)
+    {
+        //refract
+        pModel = new CModel();
+        pModel->m_Mesh = new Mesh();
+        meshData = new MeshData();
+        meshData->m_Shader = tempShader;
+        meshData->SetVertex(VertData::cubeVertices, 36, 6);
+        meshData->SetIndice(VertData::indice, 36);
+        meshData->m_Tex = tempTex;
+        meshData->m_Tex1 = tempTex1;
+        meshData->m_TexShadow = depthMap;
+        meshData->m_TexShadow1 = depthMap1;
+        meshData->Initialize();
+        meshData->m_Pos = glm::vec3(-1, 0, 0.2*i - 3);
+        meshData->m_IsCube = true;
+        pModel->m_Mesh->m_Roots.push_back(meshData);
+        //m_Models.push_back(pModel);
+    }
     pModel = new CModel();
     pModel->m_Mesh = new Mesh();
     meshData = new MeshData();
-    meshData->CreateShader("assets/cubemap.vert", "assets/cubemap.frag");
+    meshData->m_Shader = tempShader;
     meshData->SetVertex(VertData::cubeVertices, 36, 6);
     meshData->SetIndice(VertData::indice, 36);
-    meshData->m_Tex = Util::loadCubemap();
-    meshData->m_Tex1 = Util::LoadTexture("textures/container2.png");
+    meshData->m_Tex = tempTex;
+    meshData->m_Tex1 = tempTex1;
     meshData->m_TexShadow = depthMap;
     meshData->m_TexShadow1 = depthMap1;
     meshData->Initialize();
-    meshData->m_Pos = glm::vec3(-3, 0, 0);
+    meshData->m_Pos = glm::vec3(-3, 0, -3);
     meshData->m_IsCube = true;
     pModel->m_Mesh->m_Roots.push_back(meshData);
     m_Models.push_back(pModel);
-
 }
 
 void App::Update()
@@ -365,7 +386,7 @@ void App::EndRender()
     glDrawArrays(GL_TRIANGLES, 0, 6);
 #endif
 
-#ifdef SHADOWMAP
+#ifdef SHADOWMAP1
     debugDepthQuad->use();
     debugDepthQuad->setFloat("near_plane", near_plane);
     debugDepthQuad->setFloat("far_plane", far_plane);

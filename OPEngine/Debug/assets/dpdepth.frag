@@ -4,6 +4,6 @@ out float clipDepth;
 
 void main()
 {
-	if (clipDepth < 0.0)
+	if (clipDepth < -0.005)
 		discard;
 }
