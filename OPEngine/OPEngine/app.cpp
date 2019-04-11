@@ -391,6 +391,7 @@ void App::Init(int screen_width, int screen_height)
             }
         }
 
+
         pModel = new CModel();
         pModel->m_Mesh = new Mesh();
         meshData = new MeshData();
