@@ -15,7 +15,7 @@ void main()
 {
 	vec4 worldPos = model * vec4(aPos, 1.0);
 	//vec4 pos = worldview * worldPos;
-	vec4 pos = light_World_Pos - worldPos;
+	vec4 pos = vec4(light_World_Pos, 1.0) - worldPos;
 	pos /= pos.w;
 
 	pos.z *= dir;
