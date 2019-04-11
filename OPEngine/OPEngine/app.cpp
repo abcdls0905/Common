@@ -280,6 +280,7 @@ void App::Init(int screen_width, int screen_height)
     pModel = new CModel();
     pModel->m_Mesh = new Mesh();
     meshData = new MeshData();
+
     meshData->m_Shader = tempShader;
     meshData->SetVertex(VertData::cubeVertices, 36, 6);
     meshData->SetIndice(VertData::indice, 36);
@@ -292,6 +293,120 @@ void App::Init(int screen_width, int screen_height)
     meshData->m_IsCube = true;
     pModel->m_Mesh->m_Roots.push_back(meshData);
     m_Models.push_back(pModel);
+
+    //water
+    {
+        const int count = 50;
+        const int size = 8;
+        const int trianle = 6;
+        int height = 10;
+        float waterVertexs[count * count * size * trianle] = {0};
+
+        unsigned short indices[count * count * trianle] = {0};
+
+        for (int i = 0; i < count; i++)
+        {
+            for (int j = 0; j < count; ++j)
+            {
+                int idx = (j * count + i) * trianle;
+                indices[idx + 0] = idx; 
+                indices[idx + 1] = idx + 1; 
+                indices[idx + 2] = idx + 2; 
+                indices[idx + 3] = idx + 3; 
+                indices[idx + 4] = idx + 4; 
+                indices[idx + 5] = idx + 5; 
+
+                int x = 0;
+                int y = 0;
+                int index = 0;
+
+                x = i;
+                y = j;
+                index = (j * count + i) * size * trianle;
+                waterVertexs[index] = x;
+                waterVertexs[index + 1] = height;
+                waterVertexs[index + 2] = y;
+                waterVertexs[index + 3] = 0;
+                waterVertexs[index + 4] = 1;
+                waterVertexs[index + 5] = 0;
+                waterVertexs[index + 6] = 0;
+                waterVertexs[index + 7] = 0;
+
+
+                x = i + 1;
+                y = j;
+                waterVertexs[index + 8] = x;
+                waterVertexs[index + 9] = height;
+                waterVertexs[index + 10] = y;
+                waterVertexs[index + 11] = 0;
+                waterVertexs[index + 12] = 1;
+                waterVertexs[index + 13] = 0;
+                waterVertexs[index + 14] = 0;
+                waterVertexs[index + 15] = 0;
+
+                x = i + 1;
+                y = j + 1;
+                waterVertexs[index + 16] = x;
+                waterVertexs[index + 17] = height;
+                waterVertexs[index + 18] = y;
+                waterVertexs[index + 19] = 0;
+                waterVertexs[index + 20] = 1;
+                waterVertexs[index + 21] = 0;
+                waterVertexs[index + 22] = 0;
+                waterVertexs[index + 23] = 0;
+
+                x = i;
+                y = j;
+                waterVertexs[index + 24] = x;
+                waterVertexs[index + 25] = height;
+                waterVertexs[index + 26] = y;
+                waterVertexs[index + 27] = 0;
+                waterVertexs[index + 28] = 1;
+                waterVertexs[index + 29] = 0;
+                waterVertexs[index + 30] = 0;
+                waterVertexs[index + 31] = 0;
+
+                x = i + 1;
+                y = j + 1;
+                waterVertexs[index + 32] = x;
+                waterVertexs[index + 33] = height;
+                waterVertexs[index + 34] = y;
+                waterVertexs[index + 35] = 0;
+                waterVertexs[index + 36] = 1;
+                waterVertexs[index + 37] = 0;
+                waterVertexs[index + 38] = 0;
+                waterVertexs[index + 39] = 0;
+
+                x = i;
+                y = j + 1;
+                index = (y * count + x) * size * trianle;
+                waterVertexs[index + 40] = x;
+                waterVertexs[index + 41] = height;
+                waterVertexs[index + 42] = y;
+                waterVertexs[index + 43] = 0;
+                waterVertexs[index + 44] = 1;
+                waterVertexs[index + 45] = 0;
+                waterVertexs[index + 46] = 0;
+                waterVertexs[index + 47] = 0;
+            }
+        }
+
+        pModel = new CModel();
+        pModel->m_Mesh = new Mesh();
+        meshData = new MeshData();
+        meshData->m_Shader = tempShader;
+        meshData->SetVertex(waterVertexs, 36, 6);
+        meshData->SetIndice(indices, 36);
+        meshData->m_Tex = tempTex;
+        meshData->m_Tex1 = tempTex1;
+        meshData->m_TexShadow = depthMap;
+        meshData->m_TexShadow1 = depthMap1;
+        meshData->Initialize();
+        meshData->m_Pos = glm::vec3(-3, 0, -3);
+        meshData->m_IsCube = true;
+        pModel->m_Mesh->m_Roots.push_back(meshData);
+        m_Models.push_back(pModel);
+    }
 }
 
 void App::Update()
