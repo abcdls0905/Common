@@ -325,13 +325,17 @@ void App::Init(int screen_width, int screen_height)
         {
             for (int j = 0; j < count; ++j)
             {
+				int x0 = j * count + i;
+				int x1 = x0 + 1;
+				int x2 = (j + 1)*count + i;
+				int x3 = x2 + 1;
                 int index = j * count + i;
-                indices[index + 0] = index;
-                indices[index + 1] = index + 1;
-                indices[index + 2] = (j + 1) * count + i;;
-                indices[index + 3] = i;
-                indices[index + 4] = i;
-                indices[index + 5] = i;
+                indices[index + 0] = x0;
+                indices[index + 1] = x1;
+                indices[index + 2] = x3;
+                indices[index + 3] = x0;
+                indices[index + 4] = x3;
+                indices[index + 5] = x2;
             }
         }
 
