@@ -26,7 +26,7 @@ App* App::Inst()
 App::App()
 {
     m_View = new GLView();
-    m_Camera = new Camera(glm::vec3(0.0f, 5.0f, 6.0f));
+    m_Camera = new Camera(glm::vec3(0.0f, 25.0f, 6.0f));
     m_IsRenderDepth = false;
 }
 
@@ -295,8 +295,9 @@ void App::Init(int screen_width, int screen_height)
     m_Models.push_back(pModel);
 
     //water
+	if (1)
     {
-        const int count = 50;
+        const int count = 2;
         const int trianle = 6;
         int height = 10;
         float waterVertexs[count * count] = {0};
@@ -343,12 +344,11 @@ void App::Init(int screen_width, int screen_height)
         pModel->m_Mesh = new Mesh();
         meshData = new MeshData();
         meshData->m_Shader = tempShader;
-        meshData->SetVertex(waterVertexs, 36, 6);
-        meshData->SetIndice(indices, 36);
+		int count_ = count - 1;
+		meshData->SetVertex(waterVertexs, count_ * count_, 8);
+		meshData->SetIndice(indices, count_ * count_ * trianle);
         meshData->m_Tex = tempTex;
         meshData->m_Tex1 = tempTex1;
-        meshData->m_TexShadow = depthMap;
-        meshData->m_TexShadow1 = depthMap1;
         meshData->Initialize();
         meshData->m_Pos = glm::vec3(-3, 0, -3);
         meshData->m_IsCube = true;
