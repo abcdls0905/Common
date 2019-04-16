@@ -297,10 +297,11 @@ void App::Init(int screen_width, int screen_height)
     //water
 	if (1)
     {
-        const int count = 2;
+        const int count = 50;
         const int trianle = 6;
+        const int length = 8;
         int height = 10;
-        float waterVertexs[count * count] = {0};
+        float waterVertexs[count * count * length] = {0};
 
         unsigned short indices[count * count * trianle] = {0};
 
@@ -311,6 +312,7 @@ void App::Init(int screen_width, int screen_height)
                 int x = i;
                 int y = j;
                 int index = j * count + i;
+                index *= length;
                 waterVertexs[index] = x;
                 waterVertexs[index + 1] = height;
                 waterVertexs[index + 2] = y;
@@ -331,6 +333,7 @@ void App::Init(int screen_width, int screen_height)
 				int x2 = (j + 1)*count + i;
 				int x3 = x2 + 1;
                 int index = j * count + i;
+                index *= trianle;
                 indices[index + 0] = x0;
                 indices[index + 1] = x1;
                 indices[index + 2] = x3;
@@ -343,14 +346,14 @@ void App::Init(int screen_width, int screen_height)
         pModel = new CModel();
         pModel->m_Mesh = new Mesh();
         meshData = new MeshData();
-        meshData->m_Shader = tempShader;
-		int count_ = count - 1;
-		meshData->SetVertex(waterVertexs, count_ * count_, 8);
+        meshData->CreateShader("assets/shader_1.vert", "assets/shader_1.frag");
+        unsigned int tempTex = Util::LoadTexture("textures/wood.png");
+        meshData->SetVertex(waterVertexs, count * count, length);
+        int count_ = count - 1;
 		meshData->SetIndice(indices, count_ * count_ * trianle);
         meshData->m_Tex = tempTex;
-        meshData->m_Tex1 = tempTex1;
         meshData->Initialize();
-        meshData->m_Pos = glm::vec3(-3, 0, -3);
+        meshData->m_Pos = glm::vec3(-count/2, 5, -count/2);
         meshData->m_IsCube = true;
         pModel->m_Mesh->m_Roots.push_back(meshData);
         m_Models.push_back(pModel);
