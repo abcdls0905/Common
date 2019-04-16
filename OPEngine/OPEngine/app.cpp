@@ -26,7 +26,7 @@ App* App::Inst()
 App::App()
 {
     m_View = new GLView();
-    m_Camera = new Camera(glm::vec3(0.0f, 25.0f, 6.0f));
+    m_Camera = new Camera(glm::vec3(0.0f, 10, 6.0f));
     m_IsRenderDepth = false;
 }
 
@@ -297,10 +297,9 @@ void App::Init(int screen_width, int screen_height)
     //water
 	if (1)
     {
-        const int count = 50;
+        const int count = 20;
         const int trianle = 6;
         const int length = 8;
-        int height = 10;
         float waterVertexs[count * count * length] = {0};
 
         unsigned short indices[count * count * trianle] = {0};
@@ -314,7 +313,7 @@ void App::Init(int screen_width, int screen_height)
                 int index = j * count + i;
                 index *= length;
                 waterVertexs[index] = x;
-                waterVertexs[index + 1] = height;
+                waterVertexs[index + 1] = 0;
                 waterVertexs[index + 2] = y;
                 waterVertexs[index + 3] = 0;
                 waterVertexs[index + 4] = 1;
@@ -346,7 +345,7 @@ void App::Init(int screen_width, int screen_height)
         pModel = new CModel();
         pModel->m_Mesh = new Mesh();
         meshData = new MeshData();
-        meshData->CreateShader("assets/shader_1.vert", "assets/shader_1.frag");
+        meshData->CreateShader("assets/shader_1.vert", "assets/shader_2.frag");
         unsigned int tempTex = Util::LoadTexture("textures/wood.png");
         meshData->SetVertex(waterVertexs, count * count, length);
         int count_ = count - 1;
