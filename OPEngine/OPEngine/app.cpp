@@ -342,21 +342,19 @@ void App::Init(int screen_width, int screen_height)
             }
         }
 
-        pModel = new CModel();
-        pModel->m_Mesh = new Mesh();
-        meshData = new MeshData();
-        meshData->CreateShader("assets/shader_1.vert", "assets/shader_2.frag");
-        unsigned int tempTex = Util::LoadTexture("textures/wood.png");
-        meshData->SetVertex(waterVertexs, count * count, length);
+        CModel* pModel1 = new CModel();
+        pModel1->m_Mesh = new Mesh();
+        MeshData* meshData1 = new MeshData();
+        meshData1->CreateShader("assets/shader_ocean.vert", "assets/shader_ocean.frag");
+        meshData1->SetVertex(waterVertexs, count * count, length);
         int count_ = count - 1;
-		meshData->SetIndice(indices, count_ * count_ * trianle);
-        meshData->m_Tex = tempTex;
-        meshData->m_Tex1 = Util::LoadTexture("textures/fft1.png");;
-        meshData->Initialize();
-        meshData->m_Pos = glm::vec3(-count/2, 5, -count/2);
-        meshData->m_IsCube = true;
-        pModel->m_Mesh->m_Roots.push_back(meshData);
-        m_Models.push_back(pModel);
+		meshData1->SetIndice(indices, count_ * count_ * trianle);
+        meshData1->m_Tex = Util::LoadTexture("textures/ocean.png");
+        meshData1->m_Tex1 = Util::LoadTexture("textures/fft1.png");
+        meshData1->Initialize();
+        meshData1->m_Pos = glm::vec3(-count/2, 5, -count/2);
+        pModel1->m_Mesh->m_Roots.push_back(meshData1);
+        m_Models.push_back(pModel1);
     }
 }
 
