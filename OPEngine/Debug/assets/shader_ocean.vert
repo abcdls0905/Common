@@ -34,8 +34,9 @@ void main()
     
     vec2 uv_offset = TexCoords / width;
     vec3 offset = texture(material.specular, uv_offset).rgb;
+
+    FragPos += offset;
     vec4 out_pos = projection * view * vec4(FragPos, 1.0);
-    out_pos += vec4(offset, 0);
 
     gl_Position = out_pos;
 }
