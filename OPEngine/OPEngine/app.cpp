@@ -312,13 +312,13 @@ void App::Init(int screen_width, int screen_height)
                 int y = j;
                 int index = j * count + i;
                 index *= length;
-                waterVertexs[index] = x;
+                waterVertexs[index + 0] = x;
                 waterVertexs[index + 1] = 0;
                 waterVertexs[index + 2] = y;
-                waterVertexs[index + 3] = 0;
-                waterVertexs[index + 4] = 1;
+                waterVertexs[index + 3] = (float)i / count;
+                waterVertexs[index + 4] = (float)j / count;
                 waterVertexs[index + 5] = 0;
-                waterVertexs[index + 6] = 0;
+                waterVertexs[index + 6] = 1;
                 waterVertexs[index + 7] = 0;
             }
         }
@@ -351,6 +351,7 @@ void App::Init(int screen_width, int screen_height)
         int count_ = count - 1;
 		meshData->SetIndice(indices, count_ * count_ * trianle);
         meshData->m_Tex = tempTex;
+        meshData->m_Tex1 = Util::LoadTexture("textures/fft1.png");;
         meshData->Initialize();
         meshData->m_Pos = glm::vec3(-count/2, 5, -count/2);
         meshData->m_IsCube = true;
