@@ -350,7 +350,7 @@ void App::Init(int screen_width, int screen_height)
         int count_ = count - 1;
 		meshData1->SetIndice(indices, count_ * count_ * trianle);
         meshData1->m_Tex = Util::LoadTexture("textures/ocean.png");
-        meshData1->m_Tex1 = Util::LoadTexture("textures/fft1.png");
+        meshData1->m_Tex1 = Util::LoadTexture_float("textures/displacement.png");
         meshData1->Initialize();
         meshData1->m_Pos = glm::vec3(-count/2, 5, -count/2);
         pModel1->m_Mesh->m_Roots.push_back(meshData1);
