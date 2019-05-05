@@ -29,6 +29,10 @@ public class vertex_ocean
 	public float ox;
 	public float oy;
 	public float oz;
+
+    public float offset_x;
+    public float offset_y;
+    public float offset_z;
 }
 
 public class complex_vector_normal
@@ -365,6 +369,10 @@ public class Ocean : System.IDisposable
 				vertices[index1].nx = n.x;
 				vertices[index1].ny = n.y;
 				vertices[index1].nz = n.z;
+
+                vertices[index1].offset_y = vertices[index1].y;
+                vertices[index1].offset_x = h_tilde_dx[index].a * lambda;
+                vertices[index1].offset_z = h_tilde_dz[index].a * lambda;
 
 				// for tiling
 				if (n_prime == 0 && m_prime == 0)

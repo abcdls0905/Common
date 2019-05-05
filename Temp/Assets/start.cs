@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class start : MonoBehaviour {
 
+    public Texture2D texture;
     public Material material;
     const int ratio = 64;
     const int rat1 = 65;
@@ -13,7 +14,7 @@ public class start : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         ocean = new Ocean(ratio, 0.0002f, new Vector2(0.0f, 16.0f), 64, false);
-        target = new GameObject("target");
+        target = new GameObject("Ocean");
         MeshFilter mesh_filter = target.AddComponent<MeshFilter>();
         mesh_filter.mesh = new Mesh();
 
@@ -50,9 +51,44 @@ public class start : MonoBehaviour {
 
     }
 
+    void UpdateTex()
+    {
+        if (texture == null)
+            texture = new Texture2D(ratio, ratio, TextureFormat.RGBA32, false);
+        List<Vector3> offset_list = new List<Vector3>();
+        for (int n = 0; n < rat1; n++)
+        {
+            for (int m = 0; m < rat1; m++)
+            {
+                int index = n * rat1 + m;
+                float x, y, z;
+                x = ocean.vertices[index].offset_x;
+                y = ocean.vertices[index].offset_y;
+                z = ocean.vertices[index].offset_z;
+                offset_list.Add(new Vector3(x, y, z));
+            }
+        }
+
+        Vector3[] offsets = offset_list.ToArray();
+        Color[] colors = new Color[rat1 * rat1];
+
+        for (int n = 0; n < rat1; n++)
+        {
+            for (int m = 0; m < rat1; m++)
+            {
+                int index = n * rat1 + m;
+                Vector3 offset = offsets[index];
+                colors[index] = new Color(offset.x, offset.y, offset.z);
+            }
+        }
+        texture.SetPixels(colors);
+        texture.Apply();
+    }
+
 	// Update is called once per frame
 	void Update () {
         ocean.evaluateWaveFFT(Time.deltaTime);
         UpdateMesh();
+        UpdateTex();
 	}
 }
