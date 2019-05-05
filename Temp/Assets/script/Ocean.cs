@@ -88,7 +88,8 @@ public class Ocean : System.IDisposable
 		h_tilde_dz = Arrays.InitializeWithDefaultInstances<complex>(N * N);
 		fft = new cFFT(N);
 		vertices = Arrays.InitializeWithDefaultInstances<vertex_ocean>(Nplus1 * Nplus1);
-		indices = new int[Nplus1 * Nplus1 * 10];
+        //indices = new int[Nplus1 * Nplus1 * 10];
+        indices = new int[N * N * 6];
 
 		int index;
 

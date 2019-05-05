@@ -6,7 +6,7 @@ public class start : MonoBehaviour {
 
     public Material material;
     const int ratio = 64;
-    const int rat1 = 64;
+    const int rat1 = 65;
 
     GameObject target;
     Ocean ocean;
@@ -17,6 +17,13 @@ public class start : MonoBehaviour {
         MeshFilter mesh_filter = target.AddComponent<MeshFilter>();
         mesh_filter.mesh = new Mesh();
 
+        MeshRenderer mesh_render = target.AddComponent<MeshRenderer>();
+        mesh_render.sharedMaterial = material;
+    }
+
+    void UpdateMesh()
+    {
+        MeshFilter mesh_filter = target.GetComponent<MeshFilter>();
         List<Vector3> ver_list = new List<Vector3>();
         List<Vector3> nor_list = new List<Vector3>();
         for (int n = 0; n < rat1; n++)
@@ -39,15 +46,13 @@ public class start : MonoBehaviour {
         }
         mesh_filter.mesh.vertices = ver_list.ToArray();
         mesh_filter.mesh.normals = nor_list.ToArray();
-        //mesh_filter.mesh.SetIndices(ocean.indices, MeshTopology.Triangles, 0);
         mesh_filter.mesh.triangles = ocean.indices;
 
-        MeshRenderer mesh_render = target.AddComponent<MeshRenderer>();
-        mesh_render.sharedMaterial = material;
     }
-	
+
 	// Update is called once per frame
 	void Update () {
-		
+        ocean.evaluateWaveFFT(Time.deltaTime);
+        UpdateMesh();
 	}
 }
