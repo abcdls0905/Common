@@ -87,7 +87,7 @@ public class start : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-        ocean.evaluateWaveFFT(Time.deltaTime);
+        ocean.evaluateWaveFFT(Time.realtimeSinceStartup);
         UpdateMesh();
         UpdateTex();
 	}
