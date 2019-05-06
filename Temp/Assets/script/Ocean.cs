@@ -123,7 +123,6 @@ public class Ocean : System.IDisposable
 			}
 		}
 
-		List<int> vTest = new List<int>();
 		indices_count = 0;
 		for (int m_prime = 0; m_prime < N; m_prime++)
 		{
@@ -158,18 +157,9 @@ public class Ocean : System.IDisposable
 					indices[indices_count++] = index;
 					indices[indices_count++] = index + Nplus1 + 1;
 					indices[indices_count++] = index + 1;
-
-					vTest.Add(index);
-					vTest.Add(index + Nplus1);
-					vTest.Add(index + Nplus1 + 1);
-					vTest.Add(index);
-					vTest.Add(index + Nplus1 + 1);
-					vTest.Add(index + 1);
 				}
 			}
 		}
-		int index_ = 0;
-		index_ = 1;
 	}
 	public void Dispose()
 	{
@@ -286,10 +276,11 @@ public class Ocean : System.IDisposable
 		cvn.n = n;
 		return cvn;
 	}
-//C++ TO C# CONVERTER CRACKED BY X-CRACKER 2017 TODO TASK: The implementation of the following method could not be found:
-//	void evaluateWave(float t);
+
 	public void evaluateWaveFFT(float t)
 	{
+        float maxY = -100;
+        float minY = 100;
 		float kx;
 		float kz;
 		float len;
@@ -356,8 +347,13 @@ public class Ocean : System.IDisposable
 				// height
 				vertices[index1].y = h_tilde[index].a;
 
-				// displacement
-				h_tilde_dx[index] = h_tilde_dx[index] * sign;
+                if (vertices[index1].y > maxY)
+                    maxY = vertices[index1].y;
+                if (vertices[index1].y < minY)
+                    minY = vertices[index1].y;
+
+                // displacement
+                h_tilde_dx[index] = h_tilde_dx[index] * sign;
 				h_tilde_dz[index] = h_tilde_dz[index] * sign;
 				vertices[index1].x = vertices[index1].ox + h_tilde_dx[index].a * lambda;
 				vertices[index1].z = vertices[index1].oz + h_tilde_dz[index].a * lambda;
@@ -410,19 +406,7 @@ public class Ocean : System.IDisposable
 				}
 			}
 		}
-
-
-		List<vertex_ocean> vTest = new List<vertex_ocean>();
-		for (int m_prime = 0; m_prime < N; m_prime++)
-		{
-			for (int n_prime = 0; n_prime < N; n_prime++)
-			{
-				index = m_prime * N + n_prime;
-				vTest.Add(vertices[index]);
-			}
-		}
-
-		int index_ = 0;
-		index_ = 12;
-	}
+        Debug.Log("max y pos:" + maxY);
+        Debug.Log("min y pos:" + minY);
+    }
 }

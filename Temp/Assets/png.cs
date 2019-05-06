@@ -15,17 +15,6 @@ public class png : MonoBehaviour {
 	void Update () {
 		
 	}
-    void OnGUI()
-    {
-        if (GUI.Button(new Rect(100, 60, 60, 30), "save"))
-        {
-            {
-                Camera cam = Camera.main;
-                SaveTextureToPNG(cam.activeTexture, "displacement");
-            }
-        }
-    }
- 
     public bool SaveTextureToPNG(RenderTexture rt, string pngName)
     {
         RenderTexture prev = RenderTexture.active;
@@ -49,6 +38,17 @@ public class png : MonoBehaviour {
         Texture2D.DestroyImmediate(png);
         png = null;
         RenderTexture.active = prev;
+        return true;
+    }
+
+    public bool SaveTextureToPNG(Texture2D texture, string pngName)
+    {
+        Color[] colors = texture.GetPixels();
+        byte[] bytes = texture.EncodeToPNG();
+        FileStream file = File.Open(Application.dataPath + "/" + pngName + ".png", FileMode.Create);
+        BinaryWriter writer = new BinaryWriter(file);
+        writer.Write(bytes);
+        file.Close();
         return true;
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
 public class start : MonoBehaviour {
 
@@ -90,5 +91,23 @@ public class start : MonoBehaviour {
         ocean.evaluateWaveFFT(Time.realtimeSinceStartup);
         UpdateMesh();
         UpdateTex();
-	}
+    }
+    void OnGUI()
+    {
+        if (GUI.Button(new Rect(100, 60, 60, 30), "save"))
+        {
+            SaveTextureToPNG(texture, "displacement");
+        }
+    }
+
+    public bool SaveTextureToPNG(Texture2D tex, string pngName)
+    {
+        Color[] colors = tex.GetPixels();
+        byte[] bytes = tex.EncodeToPNG();
+        FileStream file = File.Open(Application.dataPath + "/" + pngName + ".png", FileMode.Create);
+        BinaryWriter writer = new BinaryWriter(file);
+        writer.Write(bytes);
+        file.Close();
+        return true;
+    }
 }
