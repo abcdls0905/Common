@@ -80,8 +80,9 @@ public class start : MonoBehaviour {
             {
                 int index = n * rat1 + m;
                 Vector3 offset = offsets[index];
-                offset += new Vector3(6, 6, 6);
-                offset /= 12;
+                const int max_value = 6;
+                offset += new Vector3(max_value, max_value, max_value);
+                offset /= 2 * max_value;
                 colors[index] = new Color(offset.x, offset.y, offset.z);
             }
         }
