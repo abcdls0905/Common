@@ -297,7 +297,7 @@ void App::Init(int screen_width, int screen_height)
     //water
 	if (1)
     {
-        const int count = 20;
+        const int count = 64;
         const int trianle = 6;
         const int length = 8;
         float waterVertexs[count * count * length] = {0};
@@ -318,8 +318,8 @@ void App::Init(int screen_width, int screen_height)
                 waterVertexs[index + 3] = 0;
                 waterVertexs[index + 4] = 1;
                 waterVertexs[index + 5] = 0;
-                waterVertexs[index + 6] = i;
-                waterVertexs[index + 7] = j;
+                waterVertexs[index + 6] = (float)i / count;
+                waterVertexs[index + 7] = (float)j / count;
             }
         }
 

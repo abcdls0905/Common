@@ -23,7 +23,7 @@ uniform mat4 lightSpaceMatrix;
 
 uniform Material material;
 
-const int width = 10;
+const int width = 1;
 
 void main()
 {
@@ -35,6 +35,9 @@ void main()
     vec2 uv_offset = TexCoords / width;
     vec3 offset = texture(material.specular, uv_offset).rgb;
 
+    const int max_value = 6;
+    offset *= (2 * max_value);
+    offset -= max_value;
     FragPos += offset;
     vec4 out_pos = projection * view * vec4(FragPos, 1.0);
 
