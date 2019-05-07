@@ -5,6 +5,7 @@ using System.IO;
 
 public class start : MonoBehaviour {
 
+    public Texture2D test_texture;
     public Texture2D texture;
     public Material material;
     const int ratio = 64;
@@ -55,7 +56,7 @@ public class start : MonoBehaviour {
     void UpdateTex()
     {
         if (texture == null)
-            texture = new Texture2D(ratio, ratio, TextureFormat.RGBA32, false);
+            texture = new Texture2D(rat1, rat1, TextureFormat.RGBAFloat, false);
         List<Vector3> offset_list = new List<Vector3>();
         for (int n = 0; n < rat1; n++)
         {
@@ -79,6 +80,8 @@ public class start : MonoBehaviour {
             {
                 int index = n * rat1 + m;
                 Vector3 offset = offsets[index];
+                offset += new Vector3(6, 6, 6);
+                offset /= 12;
                 colors[index] = new Color(offset.x, offset.y, offset.z);
             }
         }
@@ -86,11 +89,25 @@ public class start : MonoBehaviour {
         texture.Apply();
     }
 
+    void UpdateTestTexuture()
+    {
+        if (test_texture != null)
+        {
+            Color[] colors = test_texture.GetPixels();
+            for (int i = 0; i < colors.Length; i++)
+            {
+                Color color = colors[i];
+                color *= 1;
+            }
+        }
+    }
+
 	// Update is called once per frame
 	void Update () {
         ocean.evaluateWaveFFT(Time.realtimeSinceStartup);
         UpdateMesh();
         UpdateTex();
+        UpdateTestTexuture();
     }
     void OnGUI()
     {

@@ -281,7 +281,11 @@ public class Ocean : System.IDisposable
 	{
         float maxY = -100;
         float minY = 100;
-		float kx;
+        float minX = 100;
+        float maxX = -100;
+        float minZ = 100;
+        float maxZ = -100;
+        float kx;
 		float kz;
 		float len;
 		float lambda = -1.0f;
@@ -358,8 +362,18 @@ public class Ocean : System.IDisposable
 				vertices[index1].x = vertices[index1].ox + h_tilde_dx[index].a * lambda;
 				vertices[index1].z = vertices[index1].oz + h_tilde_dz[index].a * lambda;
 
-				// normal
-				h_tilde_slopex[index] = h_tilde_slopex[index] * sign;
+                if (h_tilde_dx[index].a * lambda > maxX)
+                    maxX = h_tilde_dx[index].a * lambda;
+                if (h_tilde_dx[index].a * lambda < minX)
+                    minX = h_tilde_dx[index].a * lambda;
+
+                if (h_tilde_dz[index].a * lambda > maxZ)
+                    maxZ = h_tilde_dz[index].a * lambda;
+                if (h_tilde_dz[index].a * lambda < minZ)
+                    minZ = h_tilde_dz[index].a * lambda;
+
+                // normal
+                h_tilde_slopex[index] = h_tilde_slopex[index] * sign;
 				h_tilde_slopez[index] = h_tilde_slopez[index] * sign;
 				n = new Vector3(0.0f - h_tilde_slopex[index].a, 1.0f, 0.0f - h_tilde_slopez[index].a).normalized;
 				vertices[index1].nx = n.x;
@@ -406,7 +420,5 @@ public class Ocean : System.IDisposable
 				}
 			}
 		}
-        Debug.Log("max y pos:" + maxY);
-        Debug.Log("min y pos:" + minY);
     }
 }
