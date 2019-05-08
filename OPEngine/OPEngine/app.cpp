@@ -9,6 +9,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+using namespace std;
+
 #define POST_PROCESS1
 #define SHADOWMAP
 
@@ -36,8 +38,12 @@ App::~App()
     m_View = nullptr;
 }
 
+#define uint unsigned int
+
 Shader* shader = nullptr;
 unsigned int VBO, IBO, VAO;
+const int dis_count = 150;
+uint displacements[dis_count] = { 0 };
 
 #ifdef POST_PROCESS
 
@@ -343,6 +349,7 @@ void App::Init(int screen_width, int screen_height)
         }
 
         CModel* pModel1 = new CModel();
+		pModel1->m_tag = 10;
         pModel1->m_Mesh = new Mesh();
         MeshData* meshData1 = new MeshData();
         meshData1->CreateShader("assets/shader_ocean.vert", "assets/shader_ocean.frag");
@@ -351,6 +358,16 @@ void App::Init(int screen_width, int screen_height)
 		meshData1->SetIndice(indices, count_ * count_ * trianle);
         meshData1->m_Tex = Util::LoadTexture("textures/ocean.png");
         meshData1->m_Tex1 = Util::LoadTexture_float("textures/displacement.png");
+		for (int i = 0; i < dis_count; i++)
+		{
+			string tex = "textures/Displacements/displacement";
+			char temp[4] = {0};
+			itoa(i + 1, temp, 10);
+			tex += temp;
+			tex += ".png";
+			displacements[i] = Util::LoadTexture(tex.c_str());
+		}
+
         meshData1->Initialize();
         meshData1->m_Pos = glm::vec3(-count/2, 5, -count/2);
         pModel1->m_Mesh->m_Roots.push_back(meshData1);
@@ -394,8 +411,27 @@ void renderQuad()
     glBindVertexArray(0);
 }
 
+int index = 0;
+int lastframe = 0;
+int intervalframe = 3;
+
 void App::OnFrame()
 {
+	lastframe++;
+	if (lastframe > intervalframe)
+	{
+		lastframe = 0;
+		index %= dis_count;
+		for (int i = 0; i < m_Models.size(); ++i)
+		{
+			CModel* pModel = m_Models[i];
+			if (pModel->m_tag > 0)
+			{
+				pModel->m_Mesh->m_Roots[0]->m_Tex1 = displacements[index];
+			}
+		}
+		index++;
+	}
 }
 
 bool App::OnShouldClose()
@@ -476,7 +512,8 @@ void App::OnRender()
 {
     BeginRender();
 
-    m_IsRenderDepth = false;
+	m_IsRenderDepth = false;
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     NormalRender();
 
     EndRender();

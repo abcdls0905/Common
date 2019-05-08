@@ -118,7 +118,7 @@ void Mesh::RenderNode(MeshData* pMesh)
     view = App::Inst()->m_Camera->GetViewMatrix();
     float width = app->SCR_WIDTH;
     float height = app->SCR_HEIGHT;
-    projection = glm::perspective(glm::radians(45.0f), width / height, 0.1f, 100.0f);
+    projection = glm::perspective(glm::radians(45.0f), width / height, 0.1f, 1000.0f);
     useShader->setMat4("model", model);
     useShader->setMat4("view", view);
     useShader->setMat4("projection", projection);

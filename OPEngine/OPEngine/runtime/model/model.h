@@ -55,7 +55,12 @@ public:
 class CModel
 {
 public:
+	int m_tag;
     Mesh* m_Mesh;
+	CModel()
+	{
+		m_tag = 0;
+	}
 public:
     void Render();
 };
