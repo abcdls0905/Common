@@ -5,6 +5,8 @@ using System.IO;
 
 public class start : MonoBehaviour {
 
+    public int interval = 3;
+    int lastinterval = 0;
     public Texture2D test_texture;
     public Texture2D texture;
     public Material material;
@@ -22,6 +24,7 @@ public class start : MonoBehaviour {
 
         MeshRenderer mesh_render = target.AddComponent<MeshRenderer>();
         mesh_render.sharedMaterial = material;
+        texture = new Texture2D(rat1, rat1, TextureFormat.RGBAFloat, false);
     }
 
     void UpdateMesh()
@@ -53,10 +56,15 @@ public class start : MonoBehaviour {
 
     }
 
+    int tex_idx = 0;
     void UpdateTex()
     {
-        if (texture == null)
-            texture = new Texture2D(rat1, rat1, TextureFormat.RGBAFloat, false);
+        if (lastinterval > interval)
+        {
+            lastinterval = 0;
+        }
+        lastinterval++;
+
         List<Vector3> offset_list = new List<Vector3>();
         for (int n = 0; n < rat1; n++)
         {
@@ -88,27 +96,17 @@ public class start : MonoBehaviour {
         }
         texture.SetPixels(colors);
         texture.Apply();
+        tex_idx++;
+        if (tex_idx > 250)
+            return;
+        SaveTextureToPNG(texture, "displacement" + tex_idx);
     }
-
-    void UpdateTestTexuture()
-    {
-        if (test_texture != null)
-        {
-            Color[] colors = test_texture.GetPixels();
-            for (int i = 0; i < colors.Length; i++)
-            {
-                Color color = colors[i];
-                color *= 1;
-            }
-        }
-    }
-
+    
 	// Update is called once per frame
 	void Update () {
         ocean.evaluateWaveFFT(Time.realtimeSinceStartup);
         UpdateMesh();
         UpdateTex();
-        UpdateTestTexuture();
     }
     void OnGUI()
     {
@@ -122,7 +120,7 @@ public class start : MonoBehaviour {
     {
         Color[] colors = tex.GetPixels();
         byte[] bytes = tex.EncodeToPNG();
-        FileStream file = File.Open(Application.dataPath + "/" + pngName + ".png", FileMode.Create);
+        FileStream file = File.Open(Application.dataPath + "/Displacements/" + pngName + ".png", FileMode.Create);
         BinaryWriter writer = new BinaryWriter(file);
         writer.Write(bytes);
         file.Close();
