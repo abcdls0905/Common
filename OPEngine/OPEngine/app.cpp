@@ -308,7 +308,8 @@ void App::Init(int screen_width, int screen_height)
         const int length = 8;
         float waterVertexs[count * count * length] = {0};
 
-        unsigned short indices[count * count * trianle] = {0};
+        const int index_count = count - 1;
+        unsigned short indices[index_count * index_count * trianle] = {0};
 
         for (int i = 0; i < count; i++)
         {
@@ -329,15 +330,15 @@ void App::Init(int screen_width, int screen_height)
             }
         }
 
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < index_count; ++i)
         {
-            for (int j = 0; j < count; ++j)
+            for (int j = 0; j < index_count; ++j)
             {
 				int x0 = j * count + i;
 				int x1 = x0 + 1;
-				int x2 = (j + 1)*count + i;
+				int x2 = (j + 1) * count + i;
 				int x3 = x2 + 1;
-                int index = j * count + i;
+                int index = j * index_count + i;
                 index *= trianle;
                 indices[index + 0] = x0;
                 indices[index + 1] = x1;
@@ -353,9 +354,10 @@ void App::Init(int screen_width, int screen_height)
         pModel1->m_Mesh = new Mesh();
         MeshData* meshData1 = new MeshData();
         meshData1->CreateShader("assets/shader_ocean.vert", "assets/shader_ocean.frag");
+
         meshData1->SetVertex(waterVertexs, count * count, length);
-        int count_ = count - 1;
-		meshData1->SetIndice(indices, count_ * count_ * trianle);
+
+		meshData1->SetIndice(indices, index_count * index_count * trianle);
         meshData1->m_Tex = Util::LoadTexture("textures/ocean.png");
         meshData1->m_Tex1 = Util::LoadTexture_float("textures/displacement.png");
 		for (int i = 0; i < dis_count; i++)
@@ -413,7 +415,7 @@ void renderQuad()
 
 int index = 0;
 int lastframe = 0;
-int intervalframe = 3;
+int intervalframe = 15;
 
 void App::OnFrame()
 {
