@@ -138,7 +138,7 @@ MeshRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 64713358}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -209,6 +209,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f9da6250bccb5f4dab315782363c2c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interval: 3
+  test_texture: {fileID: 0}
+  texture: {fileID: 0}
   material: {fileID: 2100000, guid: 57eaee9e4742b1a4da59935e161162cd, type: 2}
 --- !u!1 &450017335
 GameObject:

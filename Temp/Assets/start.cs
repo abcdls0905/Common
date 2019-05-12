@@ -2,6 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using System.Collections.Generic;
+
+public class OceanData
+{
+    public GameObject OceanObj;
+    public Ocean ocean;
+}
 
 public class start : MonoBehaviour {
 
@@ -15,21 +22,37 @@ public class start : MonoBehaviour {
 
     GameObject target;
     Ocean ocean;
+
+    List<OceanData> gameLists = new List<OceanData>();
+    public int ocean_index = 0;
 	// Use this for initialization
 	void Start () {
-        ocean = new Ocean(ratio, 0.0002f, new Vector2(0.0f, 16.0f), 64, false);
-        target = new GameObject("Ocean");
-        MeshFilter mesh_filter = target.AddComponent<MeshFilter>();
-        mesh_filter.mesh = new Mesh();
-
-        MeshRenderer mesh_render = target.AddComponent<MeshRenderer>();
-        mesh_render.sharedMaterial = material;
-        texture = new Texture2D(rat1, rat1, TextureFormat.RGBAFloat, false);
+        CreateOcean(new Vector3(0, 0, 0));
+        CreateOcean(new Vector3(65, 0, 0));
     }
 
-    void UpdateMesh()
+    void CreateOcean(Vector3 pos)
     {
-        MeshFilter mesh_filter = target.GetComponent<MeshFilter>();
+        GameObject OceanObj = new GameObject("Ocean_" + ocean_index);
+        OceanObj.transform.position = pos;
+        MeshFilter mesh_filter = OceanObj.AddComponent<MeshFilter>();
+        mesh_filter.mesh = new Mesh();
+
+        MeshRenderer mesh_render = OceanObj.AddComponent<MeshRenderer>();
+        mesh_render.sharedMaterial = material;
+        texture = new Texture2D(rat1, rat1, TextureFormat.RGBAFloat, false);
+
+        OceanData data = new OceanData();
+        data.OceanObj = OceanObj;
+        Ocean ocean = new Ocean(ratio, 0.0002f, new Vector2(0.0f, 16.0f), 64, false);
+        data.ocean = ocean;
+        gameLists.Add(data);
+        ocean_index++;
+    }
+
+    void UpdateMesh(OceanData oceanData)
+    {
+        MeshFilter mesh_filter = oceanData.OceanObj.GetComponent<MeshFilter>();
         List<Vector3> ver_list = new List<Vector3>();
         List<Vector3> nor_list = new List<Vector3>();
         for (int n = 0; n < rat1; n++)
@@ -39,12 +62,12 @@ public class start : MonoBehaviour {
                 int index = n * rat1 + m;
                 float x, y, z;
                 float nx, ny, nz;
-                x = ocean.vertices[index].x;
-                y = ocean.vertices[index].y;
-                z = ocean.vertices[index].z;
-                nx = ocean.vertices[index].nx;
-                ny = ocean.vertices[index].ny;
-                nz = ocean.vertices[index].nz;
+                x = oceanData.ocean.vertices[index].x;
+                y = oceanData.ocean.vertices[index].y;
+                z = oceanData.ocean.vertices[index].z;
+                nx = oceanData.ocean.vertices[index].nx;
+                ny = oceanData.ocean.vertices[index].ny;
+                nz = oceanData.ocean.vertices[index].nz;
 
                 ver_list.Add(new Vector3(x, y, z));
                 nor_list.Add(new Vector3(nx, ny, nz));
@@ -52,12 +75,12 @@ public class start : MonoBehaviour {
         }
         mesh_filter.mesh.vertices = ver_list.ToArray();
         mesh_filter.mesh.normals = nor_list.ToArray();
-        mesh_filter.mesh.triangles = ocean.indices;
+        mesh_filter.mesh.triangles = oceanData.ocean.indices;
 
     }
 
     int tex_idx = 0;
-    void UpdateTex()
+    void UpdateTex(OceanData oceanData)
     {
         if (lastinterval > interval)
         {
@@ -72,9 +95,9 @@ public class start : MonoBehaviour {
             {
                 int index = n * rat1 + m;
                 float x, y, z;
-                x = ocean.vertices[index].offset_x;
-                y = ocean.vertices[index].offset_y;
-                z = ocean.vertices[index].offset_z;
+                x = oceanData.ocean.vertices[index].offset_x;
+                y = oceanData.ocean.vertices[index].offset_y;
+                z = oceanData.ocean.vertices[index].offset_z;
                 offset_list.Add(new Vector3(x, y, z));
             }
         }
@@ -97,16 +120,21 @@ public class start : MonoBehaviour {
         texture.SetPixels(colors);
         texture.Apply();
         tex_idx++;
-        if (tex_idx > 250)
+        if (tex_idx > 50 || true)
             return;
         SaveTextureToPNG(texture, "displacement" + tex_idx);
     }
     
 	// Update is called once per frame
 	void Update () {
-        ocean.evaluateWaveFFT(Time.realtimeSinceStartup);
-        UpdateMesh();
-        UpdateTex();
+        int count = gameLists.Count;
+        for (int i = 0; i < count; ++i)
+        {
+            OceanData oceanData = gameLists[i];
+            oceanData.ocean.evaluateWaveFFT(Time.realtimeSinceStartup);
+            UpdateMesh(oceanData);
+            UpdateTex(oceanData);
+        }
     }
     void OnGUI()
     {
