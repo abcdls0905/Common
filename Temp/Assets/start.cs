@@ -17,18 +17,18 @@ public class start : MonoBehaviour {
     public Texture2D test_texture;
     public Texture2D texture;
     public Material material;
-    const int ratio = 64;
-    const int rat1 = 65;
 
-    GameObject target;
-    Ocean ocean;
+    const int radio_const = 64;
+
+    const int ratio = radio_const;
+    const int rat1 = radio_const + 1;
 
     List<OceanData> gameLists = new List<OceanData>();
     public int ocean_index = 0;
 	// Use this for initialization
 	void Start () {
         CreateOcean(new Vector3(0, 0, 0));
-        CreateOcean(new Vector3(65, 0, 0));
+        CreateOcean(new Vector3(0, 0, rat1));
     }
 
     void CreateOcean(Vector3 pos)
@@ -44,7 +44,7 @@ public class start : MonoBehaviour {
 
         OceanData data = new OceanData();
         data.OceanObj = OceanObj;
-        Ocean ocean = new Ocean(ratio, 0.0002f, new Vector2(0.0f, 16.0f), 64, false);
+        Ocean ocean = new Ocean(ratio, 0.0002f, new Vector2(0.0f, 16.0f), ratio, false);
         data.ocean = ocean;
         gameLists.Add(data);
         ocean_index++;
