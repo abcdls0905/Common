@@ -1,5 +1,4 @@
 #include "Game.h"
-#include "d3dUtility.h"
 
 Game* Game::m_GameInstance = nullptr;
 

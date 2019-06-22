@@ -1,6 +1,6 @@
 #pragma once
 
-struct IDirect3DDevice9;
+#include "d3dUtility.h"
 
 struct SVertex
 {
