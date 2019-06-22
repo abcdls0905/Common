@@ -13,6 +13,7 @@ struct SVertex
 	float x;
 	float y;
 	float z;
+	static const DWORD FVF = D3DFVF_XYZ;
 };
 
 class Game
