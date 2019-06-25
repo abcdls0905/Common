@@ -41,7 +41,7 @@ int WINAPI WinMain(HINSTANCE hinstance,
 				   int showCmd)
 {
 	if(!d3d::InitD3D(hinstance,
-		640, 480, true, D3DDEVTYPE_HAL, &Device))
+		1280, 768, true, D3DDEVTYPE_HAL, &Device))
 	{
 		::MessageBox(0, "InitD3D() - FAILED", 0, 0);
 		return 0;

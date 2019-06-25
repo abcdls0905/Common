@@ -4,16 +4,18 @@
 
 struct SVertex
 {
-	SVertex(float x, float y, float z)
-	{
-		this->x = x;
-		this->y = y;
-		this->z = z;
-	}
+    SVertex(float x, float y, float z, D3DCOLOR color)
+    {
+        this->x = x;
+        this->y = y;
+        this->z = z;
+        this->color = color;
+    }
 	float x;
 	float y;
-	float z;
-	static const DWORD FVF = D3DFVF_XYZ;
+    float z;
+    D3DCOLOR color;
+	static const DWORD FVF = D3DFVF_XYZ | D3DFVF_DIFFUSE;
 };
 
 class Game

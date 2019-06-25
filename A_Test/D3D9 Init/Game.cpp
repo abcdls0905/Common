@@ -24,12 +24,6 @@ void Game::Update()
 
 }
 
-void Game::Render()
-{
-	m_Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x0, 1, 0);
-	m_Device->Present(0, 0, 0, 0);
-}
-
 bool Game::Initialize(IDirect3DDevice9* device)
 {
 	this->m_Device = device;
@@ -42,10 +36,35 @@ void Game::InitRenderData()
 	m_Device->CreateVertexBuffer(sizeof(SVertex) * 3, D3DUSAGE_WRITEONLY, SVertex::FVF, D3DPOOL_MANAGED, &m_VB, 0);
 	SVertex* vertices;
 	m_VB->Lock(0, sizeof(SVertex) * 3, (void**)&vertices, D3DLOCK_READONLY);
-	vertices[0] = SVertex(-1.0f, 0.0f, 2.0f);
-	vertices[1] = SVertex(0.0f, 1.0f, 2.0f);
-	vertices[2] = SVertex(1.0f, 0.0f, 2.0f);
-	m_VB->Unlock();
+	vertices[0] = SVertex(-1.0f, 0.0f, 2.0f, D3DCOLOR_XRGB(255, 0, 0));
+	vertices[1] = SVertex(0.0f, 1.0f, 2.0f, D3DCOLOR_XRGB(0, 255, 0));
+	vertices[2] = SVertex(1.0f, 0.0f, 2.0f, D3DCOLOR_XRGB(0, 0, 255));
+    m_VB->Unlock();
+    D3DXMATRIX proj;
+    float Width = 1360;
+    float Height = 768;
+
+    D3DXMatrixPerspectiveFovLH(
+        &proj,                        // result
+        D3DX_PI * 0.5f,               // 90 - degrees
+        (float)Width / (float)Height, // aspect ratio
+        1.0f,                         // near plane
+        1000.0f);                     // far plane
+    m_Device->SetTransform(D3DTS_PROJECTION, &proj);
+    m_Device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+    m_Device->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
+    m_Device->SetRenderState(D3DRS_LIGHTING, false);
+}
+
+void Game::Render()
+{
+    m_Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0xffffffff, 1, 0);
+    m_Device->BeginScene();
+    m_Device->SetStreamSource(0, m_VB, 0, sizeof(SVertex));
+    m_Device->SetFVF(SVertex::FVF);
+    m_Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
+    m_Device->EndScene();
+    m_Device->Present(0, 0, 0, 0);
 }
 
 void Game::End()
