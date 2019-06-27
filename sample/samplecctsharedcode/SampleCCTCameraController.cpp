@@ -377,9 +377,7 @@ void SampleCCTCameraController::update(Camera& camera, PxReal dtime)
 			if(heightDelta!=0.0f)
 				dy = heightDelta;
 			else
-			{
-				//dy = mGravity * dtime;
-			}
+				dy = mGravity * dtime;
 			//			shdfnd::printFormatted("%f\n", dy);
 
 			if(i==mControlledIndex)
