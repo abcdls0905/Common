@@ -4,7 +4,7 @@
 
 struct SVertex
 {
-    SVertex(float x, float y, float z, float nx, float ny, float nz, D3DCOLOR color)
+    SVertex(float x, float y, float z, float nx, float ny, float nz, float u, float v, D3DCOLOR color)
     {
         this->x = x;
         this->y = y;
@@ -12,6 +12,8 @@ struct SVertex
         this->nx = nx;
         this->ny = ny;
         this->nz = nz;
+		this->u = u;
+		this->v = v;
 		this->color = color;
     }
 	float x;
@@ -20,8 +22,10 @@ struct SVertex
     float nx;
     float ny;
     float nz;
+	float u;
+	float v;
 	D3DCOLOR color;
-	static const DWORD FVF = D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE ;
+	static const DWORD FVF = D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX0 | D3DFVF_DIFFUSE ;
 };
 
 class Game
@@ -39,6 +43,7 @@ public:
 	static Game* GetInstance();
 private:
 	IDirect3DVertexBuffer9* m_VB;
+	IDirect3DTexture9* m_Tex;
 	IDirect3DIndexBuffer9* m_IB;
 	IDirect3DDevice9* m_Device;
 	static Game* m_GameInstance;
