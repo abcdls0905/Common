@@ -62,25 +62,22 @@ void Game::InitRenderData()
 	m_Device->CreateVertexBuffer(sizeof(SVertex) * 12, D3DUSAGE_WRITEONLY, SVertex::FVF, D3DPOOL_MANAGED, &m_VB, 0);
 	SVertex* vertices;
 	m_VB->Lock(0, sizeof(SVertex) * 12, (void**)&vertices, D3DLOCK_READONLY);
-    vertices[0] = SVertex(-1.0f, 0.0f, 2.0f, 0, 0, 1, D3DCOLOR_XRGB(255, 0, 0));
-    vertices[1] = SVertex(0.0f, 1.0f, 2.0f,  0, 0, 1, D3DCOLOR_XRGB(0, 255, 0));
-    vertices[2] = SVertex(1.0f, 0.0f, 2.0f,  0, 0, 1, D3DCOLOR_XRGB(0, 0, 255));
 
     vertices[0] = SVertex(-1.0f, 0.0f, -1.0f, 0.0f, 0.707f, -0.707f, d3d::BLUE);
-    vertices[1] = SVertex( 0.0f, 1.0f, 0.0f, 0.0f, 0.707f, -0.707f, d3d::BLUE);
+    vertices[1] = SVertex( 0.0f, 1.0f, 0.0f, 0.0f, 0.707f, -0.707f,  d3d::BLUE);
     vertices[2] = SVertex( 1.0f, 0.0f, -1.0f, 0.0f, 0.707f, -0.707f, d3d::BLUE);
     // left face
-    vertices[3] = SVertex(-1.0f, 0.0f, 1.0f, -0.707f, 0.707f, 0.0f, d3d::BLUE);
-    vertices[4] = SVertex( 0.0f, 1.0f, 0.0f, -0.707f, 0.707f, 0.0f, d3d::BLUE);
+    vertices[3] = SVertex(-1.0f, 0.0f, 1.0f, -0.707f, 0.707f, 0.0f,  d3d::BLUE);
+    vertices[4] = SVertex( 0.0f, 1.0f, 0.0f, -0.707f, 0.707f, 0.0f,  d3d::BLUE);
     vertices[5] = SVertex(-1.0f, 0.0f, -1.0f, -0.707f, 0.707f, 0.0f, d3d::BLUE);
     // right face
-    vertices[6] = SVertex( 1.0f, 0.0f, -1.0f, 0.707f, 0.707f, 0.0f, d3d::BLUE);
-    vertices[7] = SVertex( 0.0f, 1.0f, 0.0f, 0.707f, 0.707f, 0.0f, d3d::BLUE);
-    vertices[8] = SVertex( 1.0f, 0.0f, 1.0f, 0.707f, 0.707f, 0.0f, d3d::BLUE);
+    vertices[6] = SVertex( 1.0f, 0.0f, -1.0f, 0.707f, 0.707f, 0.0f,  d3d::BLUE);
+    vertices[7] = SVertex( 0.0f, 1.0f, 0.0f, 0.707f, 0.707f, 0.0f,   d3d::BLUE);
+    vertices[8] = SVertex( 1.0f, 0.0f, 1.0f, 0.707f, 0.707f, 0.0f,   d3d::BLUE);
     // back face
-    vertices[9] = SVertex( 1.0f, 0.0f, 1.0f, 0.0f, 0.707f, 0.707f, d3d::BLUE);
-    vertices[10] = SVertex( 0.0f, 1.0f, 0.0f, 0.0f, 0.707f, 0.707f, d3d::BLUE);
-    vertices[11] = SVertex(-1.0f, 0.0f, 1.0f, 0.0f, 0.707f, 0.707f, d3d::BLUE);
+    vertices[9] = SVertex( 1.0f, 0.0f, 1.0f, 0.0f, 0.707f, 0.707f,   d3d::BLUE);
+    vertices[10] = SVertex( 0.0f, 1.0f, 0.0f, 0.0f, 0.707f, 0.707f,  d3d::BLUE);
+    vertices[11] = SVertex(-1.0f, 0.0f, 1.0f, 0.0f, 0.707f, 0.707f,  d3d::BLUE);
 
     m_VB->Unlock();
     D3DXMATRIX proj;
@@ -106,8 +103,8 @@ void Game::InitRenderData()
     m_Device->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
 
     m_Device->SetRenderState(D3DRS_NORMALIZENORMALS, true);
-    m_Device->SetRenderState(D3DRS_LIGHTING, true);
     m_Device->SetRenderState(D3DRS_SPECULARENABLE, true);
+	m_Device->SetRenderState(D3DRS_LIGHTING, false);
 
     D3DMATERIAL9 mtrl;
     mtrl.Ambient = d3d::BLUE;
@@ -116,9 +113,9 @@ void Game::InitRenderData()
     mtrl.Emissive = d3d::BLACK;
     mtrl.Power = 5.0f;
 
-    m_Device->SetMaterial(&mtrl);
+   m_Device->SetMaterial(&mtrl);
 
-    D3DXVECTOR3 dir(0, 0, -1);
+    D3DXVECTOR3 dir(0, 1, 0);
     D3DXCOLOR c = d3d::RED;
     D3DLIGHT9 dirLight = InitDirectionalLight(&dir, &c);
     m_Device->SetLight(0, &dirLight);
@@ -139,7 +136,7 @@ void Game::Render(float deltaTime)
 
     m_Device->SetTransform(D3DTS_WORLD, &yRot);
 
-    m_Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x0, 1, 0);
+    m_Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0xffffffff, 1, 0);
     m_Device->BeginScene();
     m_Device->SetStreamSource(0, m_VB, 0, sizeof(SVertex));
     m_Device->SetFVF(SVertex::FVF);
