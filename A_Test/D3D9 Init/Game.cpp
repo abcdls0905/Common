@@ -59,6 +59,8 @@ D3DLIGHT9 Game::InitDirectionalLight(D3DXVECTOR3* direction, D3DXCOLOR* color)
 
 void Game::InitRenderData()
 {
+	m_Device->SetRenderState(D3DRS_LIGHTING, true);
+
 	m_Device->CreateVertexBuffer(sizeof(SVertex) * 12, D3DUSAGE_WRITEONLY, SVertex::FVF, D3DPOOL_MANAGED, &m_VB, 0);
 	SVertex* vertices;
 	m_VB->Lock(0, sizeof(SVertex) * 12, (void**)&vertices, D3DLOCK_READONLY);
@@ -80,46 +82,50 @@ void Game::InitRenderData()
     vertices[11] = SVertex(-1.0f, 0.0f, 1.0f, 0.0f, 0.707f, 0.707f,  d3d::BLUE);
 
     m_VB->Unlock();
-    D3DXMATRIX proj;
-    float Width = 1360;
-    float Height = 768;
-
-
-    D3DXVECTOR3 pos(0.0f, 1.0f, -3.0f);
-    D3DXVECTOR3 target(0.0f, 0.0f, 0.0f);
-    D3DXVECTOR3 up(0.0f, 1.0f, 0.0f);
-    D3DXMATRIX V;
-    D3DXMatrixLookAtLH(&V, &pos, &target, &up);
-    m_Device->SetTransform(D3DTS_VIEW, &V);
-
-    D3DXMatrixPerspectiveFovLH(
-        &proj,
-        D3DX_PI * 0.5f,
-        (float)Width / (float)Height,
-        1.0f,
-        1000.0f);
-    m_Device->SetTransform(D3DTS_PROJECTION, &proj);
-    m_Device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
-    m_Device->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
-
-    m_Device->SetRenderState(D3DRS_NORMALIZENORMALS, true);
-    m_Device->SetRenderState(D3DRS_SPECULARENABLE, true);
-	m_Device->SetRenderState(D3DRS_LIGHTING, false);
 
     D3DMATERIAL9 mtrl;
-    mtrl.Ambient = d3d::BLUE;
-    mtrl.Diffuse = d3d::BLUE;
+    mtrl.Ambient = d3d::GREEN;
+    mtrl.Diffuse = d3d::GREEN;
     mtrl.Specular = d3d::BLUE;
     mtrl.Emissive = d3d::BLACK;
     mtrl.Power = 5.0f;
 
    m_Device->SetMaterial(&mtrl);
 
-    D3DXVECTOR3 dir(0, 1, 0);
-    D3DXCOLOR c = d3d::RED;
-    D3DLIGHT9 dirLight = InitDirectionalLight(&dir, &c);
-    m_Device->SetLight(0, &dirLight);
-    m_Device->LightEnable(0, true);
+
+   D3DLIGHT9 dir;
+   ::ZeroMemory(&dir, sizeof(dir));
+   dir.Type = D3DLIGHT_DIRECTIONAL;
+   dir.Diffuse = d3d::WHITE;
+   dir.Specular = d3d::WHITE * 0.3f;
+   dir.Ambient = d3d::WHITE * 0.6f;
+   dir.Direction = D3DXVECTOR3(1.0f, 0.0f, 0.0f);
+
+	m_Device->SetLight(0, &dir);
+	m_Device->LightEnable(0, true);
+
+	m_Device->SetRenderState(D3DRS_NORMALIZENORMALS, true);
+	m_Device->SetRenderState(D3DRS_SPECULARENABLE, true);
+
+	D3DXMATRIX proj;
+	float Width = 1360;
+	float Height = 768;
+
+	D3DXVECTOR3 pos(0.0f, 1.0f, -3.0f);
+	D3DXVECTOR3 target(0.0f, 0.0f, 0.0f);
+	D3DXVECTOR3 up(0.0f, 1.0f, 0.0f);
+	D3DXMATRIX V;
+	D3DXMatrixLookAtLH(&V, &pos, &target, &up);
+	m_Device->SetTransform(D3DTS_VIEW, &V);
+
+	D3DXMatrixPerspectiveFovLH(
+		&proj,
+		D3DX_PI * 0.5f,
+		(float)Width / (float)Height,
+		1.0f,
+		1000.0f);
+	m_Device->SetTransform(D3DTS_PROJECTION, &proj);
+
 }
 
 void Game::Render(float deltaTime)
