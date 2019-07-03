@@ -51,7 +51,7 @@ D3DLIGHT9 Game::InitDirectionalLight(D3DXVECTOR3* direction, D3DXCOLOR* color)
 	::ZeroMemory(&light, sizeof(light));
 	light.Type = D3DLIGHT_DIRECTIONAL;
 	light.Diffuse = d3d::WHITE;
-	light.Specular = d3d::WHITE * 0.3f;
+	light.Specular = d3d::WHITE * 0.5f;
 	light.Ambient = d3d::WHITE * 0.6f;
 	light.Direction = D3DXVECTOR3(1.0f, 0.0f, 0.0f);
     return light;
@@ -59,34 +59,34 @@ D3DLIGHT9 Game::InitDirectionalLight(D3DXVECTOR3* direction, D3DXCOLOR* color)
 
 void Game::InitRenderData()
 {
-	m_Device->SetRenderState(D3DRS_LIGHTING, true);
 	m_Device->CreateVertexBuffer(sizeof(SVertex) * 12, D3DUSAGE_WRITEONLY, SVertex::FVF, D3DPOOL_MANAGED, &m_VB, 0);
 	SVertex* vertices;
 	m_VB->Lock(0, sizeof(SVertex) * 12, (void**)&vertices, D3DLOCK_READONLY);
 
-    vertices[0] = SVertex(-1.0f, 0.0f, -1.0f, 0.0f, 0.707f, -0.707f, 0, 1, d3d::BLUE);
-    vertices[1] = SVertex( 0.0f, 1.0f, 0.0f, 0.0f, 0.707f, -0.707f,  0, 0, d3d::BLUE);
-    vertices[2] = SVertex( 1.0f, 0.0f, -1.0f, 0.0f, 0.707f, -0.707f, 1, 0, d3d::BLUE);
+    vertices[0] = SVertex(-1.0f, 0.0f, -1.0f, 0.0f, 0.707f, -0.707f, 0, 0, d3d::BLUE);
+    vertices[1] = SVertex( 0.0f, 1.0f, 0.0f, 0.0f, 0.707f, -0.707f,  1, 0, d3d::BLUE);
+    vertices[2] = SVertex( 1.0f, 0.0f, -1.0f, 0.0f, 0.707f, -0.707f, 0, 1, d3d::BLUE);
     // left face
-	vertices[3] = SVertex(-1.0f, 0.0f, 1.0f, -0.707f, 0.707f, 0.0f,  0, 1, d3d::BLUE);
-	vertices[4] = SVertex(0.0f, 1.0f, 0.0f, -0.707f, 0.707f, 0.0f,   0, 0, d3d::BLUE);
-	vertices[5] = SVertex(-1.0f, 0.0f, -1.0f, -0.707f, 0.707f, 0.0f, 1, 0, d3d::BLUE);
+    vertices[3] = SVertex(-1.0f, 0.0f, 1.0f, -0.707f, 0.707f, 0.0f,  0, 0, d3d::BLUE);
+    vertices[4] = SVertex( 0.0f, 1.0f, 0.0f, -0.707f, 0.707f, 0.0f,  1, 0, d3d::BLUE);
+    vertices[5] = SVertex(-1.0f, 0.0f, -1.0f, -0.707f, 0.707f, 0.0f, 0, 1, d3d::BLUE);
     // right face
-    vertices[6] = SVertex( 1.0f, 0.0f, -1.0f, 0.707f, 0.707f, 0.0f,  0, 1, d3d::BLUE);
-    vertices[7] = SVertex( 0.0f, 1.0f, 0.0f, 0.707f, 0.707f, 0.0f,   0, 0, d3d::BLUE);
-    vertices[8] = SVertex( 1.0f, 0.0f, 1.0f, 0.707f, 0.707f, 0.0f,   1, 0, d3d::BLUE);
+    vertices[6] = SVertex( 1.0f, 0.0f, -1.0f, 0.707f, 0.707f, 0.0f,  0, 0, d3d::BLUE);
+    vertices[7] = SVertex( 0.0f, 1.0f, 0.0f, 0.707f, 0.707f, 0.0f,   1, 0, d3d::BLUE);
+    vertices[8] = SVertex( 1.0f, 0.0f, 1.0f, 0.707f, 0.707f, 0.0f,   0, 1, d3d::BLUE);
     // back face
-    vertices[9] = SVertex( 1.0f, 0.0f, 1.0f, 0.0f, 0.707f, 0.707f,   0, 1, d3d::BLUE);
-    vertices[10] = SVertex( 0.0f, 1.0f, 0.0f, 0.0f, 0.707f, 0.707f,  0, 0, d3d::BLUE);
-    vertices[11] = SVertex(-1.0f, 0.0f, 1.0f, 0.0f, 0.707f, 0.707f,  1, 0, d3d::BLUE);
+    vertices[9] = SVertex( 1.0f, 0.0f, 1.0f, 0.0f, 0.707f, 0.707f,   0, 0, d3d::BLUE);
+    vertices[10] = SVertex( 0.0f, 1.0f, 0.0f, 0.0f, 0.707f, 0.707f,  1, 0, d3d::BLUE);
+    vertices[11] = SVertex(-1.0f, 0.0f, 1.0f, 0.0f, 0.707f, 0.707f,  0, 1, d3d::BLUE);
 
     m_VB->Unlock();
 
-	D3DXCreateTextureFromFile(m_Device, "dx5_logo.bmp", &m_Tex);
+	D3DXCreateTextureFromFile(m_Device, "res/tex/dx5_logo.bmp", &m_Tex);
 	m_Device->SetTexture(0, m_Tex);
+	m_Device->SetTexture(1, m_Tex);
 	m_Device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 	m_Device->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-	//m_Device->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+	m_Device->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
 
     D3DXMATRIX proj;
     float Width = 1360;
@@ -110,13 +110,14 @@ void Game::InitRenderData()
     m_Device->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
 
     m_Device->SetRenderState(D3DRS_NORMALIZENORMALS, true);
-    m_Device->SetRenderState(D3DRS_SPECULARENABLE, true);
+	m_Device->SetRenderState(D3DRS_SPECULARENABLE, true);
+	m_Device->SetRenderState(D3DRS_LIGHTING, true);
 
     D3DMATERIAL9 mtrl;
-    mtrl.Ambient = d3d::GREEN;
-    mtrl.Diffuse = d3d::GREEN;
-    mtrl.Specular = d3d::GREEN;
-    mtrl.Emissive = d3d::BLACK;
+    mtrl.Ambient = d3d::WHITE;
+    mtrl.Diffuse = d3d::WHITE;
+    mtrl.Specular = d3d::WHITE;
+    mtrl.Emissive = d3d::WHITE;
     mtrl.Power = 5.0f;
 
     m_Device->SetMaterial(&mtrl);

@@ -14,7 +14,6 @@ struct SVertex
         this->nz = nz;
 		this->u = u;
 		this->v = v;
-		this->color = color;
     }
 	float x;
 	float y;
@@ -24,8 +23,8 @@ struct SVertex
     float nz;
 	float u;
 	float v;
-	D3DCOLOR color;
-	static const DWORD FVF = D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX0 | D3DFVF_DIFFUSE ;
+	//static const DWORD FVF = D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1 | D3DFVF_DIFFUSE;
+	static const DWORD FVF = D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1;
 };
 
 class Game
