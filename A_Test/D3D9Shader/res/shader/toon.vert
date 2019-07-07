@@ -16,7 +16,7 @@ struct VS_OUTPUT
 {
 	float4 position : POSITION;
 	float4 uv : TEXCOORD;
-	float4 color : DIFFUSE;
+	float4 color : COLOR;
 };
 
 VS_OUTPUT main(VS_INPUT input)
