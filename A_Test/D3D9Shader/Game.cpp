@@ -166,6 +166,54 @@ void Game::InitRenderData()
 
 	d3d::Release<ID3DXBuffer*>(shader);
 
+	hr = D3DXCompileShaderFromFile(
+		"res/shader/multi.ps",
+		0,
+		0,
+		"Main", // entry point function name
+		"ps_2_0",
+		D3DXSHADER_DEBUG,
+		&shader,
+		&errorBuffer,
+		&m_MultiTexCT);
+	if (errorBuffer)
+	{
+		::MessageBox(0, (char*)errorBuffer->GetBufferPointer(), 0, 0);
+		d3d::Release<ID3DXBuffer*>(errorBuffer);
+	}
+
+	if (FAILED(hr))
+	{
+		::MessageBox(0, "D3DXCompileShaderFromFile() - FAILED", 0, 0);
+		return;
+	}
+	hr = m_Device->CreatePixelShader(
+		(DWORD*)shader->GetBufferPointer(),
+		&m_MultiTexPS);
+
+	if (FAILED(hr))
+	{
+		::MessageBox(0, "CreateVertexShader - FAILED", 0, 0);
+		return;
+	}
+
+	d3d::Release<ID3DXBuffer*>(shader);
+
+	D3DXCreateTextureFromFile(m_Device, "res/tex/crate.bmp", &BaseTex);
+	D3DXCreateTextureFromFile(m_Device, "res/tex/spotlight.bmp", &SpotLightTex);
+	D3DXCreateTextureFromFile(m_Device, "res/tex/text.bmp", &StringTex);
+
+	m_ShaderHandle.BaseTexHandle = m_MultiTexCT->GetConstantByName(0, "BaseTex");
+	m_ShaderHandle.SpotLightTexHandle = m_MultiTexCT->GetConstantByName(0, "SpotLightTex");
+	m_ShaderHandle.StringTexHandle = m_MultiTexCT->GetConstantByName(0, "StringTex");
+
+	UINT count;
+
+	m_MultiTexCT->GetConstantDesc(m_ShaderHandle.BaseTexHandle, &m_ShaderHandle.BaseTexDesc, &count);
+	m_MultiTexCT->GetConstantDesc(m_ShaderHandle.SpotLightTexHandle, &m_ShaderHandle.SpotLightTexDesc, &count);
+	m_MultiTexCT->GetConstantDesc(m_ShaderHandle.StringTexHandle, &m_ShaderHandle.StringTexDesc, &count);
+
+	m_MultiTexCT->SetDefaults(m_Device);
 }
 
 void Game::Render(float deltaTime)
@@ -183,9 +231,28 @@ void Game::Render(float deltaTime)
     m_Device->SetTransform(D3DTS_WORLD, &yRot);
 
     m_Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0xffffffff, 1, 0);
-    m_Device->BeginScene();
+	m_Device->BeginScene();
+	m_Device->SetPixelShader(m_MultiTexPS);
+	m_Device->SetFVF(SVertex::FVF);
     m_Device->SetStreamSource(0, m_VB, 0, sizeof(SVertex));
-    m_Device->SetFVF(SVertex::FVF);
+
+	m_Device->SetTexture(m_ShaderHandle.BaseTexDesc.RegisterIndex, BaseTex);
+	m_Device->SetSamplerState(m_ShaderHandle.BaseTexDesc.RegisterIndex, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+	m_Device->SetSamplerState(m_ShaderHandle.BaseTexDesc.RegisterIndex, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	m_Device->SetSamplerState(m_ShaderHandle.BaseTexDesc.RegisterIndex, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+
+	// spotlight tex
+	m_Device->SetTexture(m_ShaderHandle.SpotLightTexDesc.RegisterIndex, SpotLightTex);
+	m_Device->SetSamplerState(m_ShaderHandle.SpotLightTexDesc.RegisterIndex, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+	m_Device->SetSamplerState(m_ShaderHandle.SpotLightTexDesc.RegisterIndex, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	m_Device->SetSamplerState(m_ShaderHandle.SpotLightTexDesc.RegisterIndex, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+
+	// string tex
+	m_Device->SetTexture(m_ShaderHandle.StringTexDesc.RegisterIndex, StringTex);
+	m_Device->SetSamplerState(m_ShaderHandle.StringTexDesc.RegisterIndex, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+	m_Device->SetSamplerState(m_ShaderHandle.StringTexDesc.RegisterIndex, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	m_Device->SetSamplerState(m_ShaderHandle.StringTexDesc.RegisterIndex, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+
     m_Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 4);
     m_Device->EndScene();
     m_Device->Present(0, 0, 0, 0);

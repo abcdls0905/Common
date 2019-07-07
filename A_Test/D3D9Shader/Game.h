@@ -11,24 +11,43 @@ struct SVertex
         this->z = z;
         this->nx = nx;
         this->ny = ny;
-        this->nz = nz;
+		this->nz = nz;
 		this->u = u;
 		this->v = v;
+		this->u1 = u;
+		this->v1 = v;
+		this->u2 = u;
+		this->v2 = v;
     }
 	float x;
 	float y;
     float z;
     float nx;
     float ny;
-    float nz;
+	float nz;
 	float u;
 	float v;
+	float u1;
+	float v1;
+	float u2;
+	float v2;
 	//static const DWORD FVF = D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1 | D3DFVF_DIFFUSE;
-	static const DWORD FVF = D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1;
+	static const DWORD FVF = D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX3;
 };
 
 class Game
 {
+public:
+	struct ShaderHandle
+	{
+		D3DXHANDLE BaseTexHandle;
+		D3DXHANDLE SpotLightTexHandle;
+		D3DXHANDLE StringTexHandle;
+
+		D3DXCONSTANT_DESC BaseTexDesc;
+		D3DXCONSTANT_DESC SpotLightTexDesc;
+		D3DXCONSTANT_DESC StringTexDesc;
+	};
 public:
 	Game();
 	~Game();
@@ -49,4 +68,13 @@ private:
 
 	IDirect3DVertexShader9* m_ToonShader = 0;
 	ID3DXConstantTable* m_ToonConstTable = 0;
+
+	IDirect3DPixelShader9* m_MultiTexPS = 0;
+	ID3DXConstantTable* m_MultiTexCT;
+
+	IDirect3DTexture9* BaseTex = 0;
+	IDirect3DTexture9* SpotLightTex = 0;
+	IDirect3DTexture9* StringTex = 0;
+
+	ShaderHandle m_ShaderHandle;
 };
