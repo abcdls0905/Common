@@ -2,6 +2,10 @@
 #include "stdafx.h"
 #include "demo.h"
 
+#pragma comment(lib, "d3d11.lib") 
+#pragma comment(lib, "d3dx11.lib") 
+#pragma comment(lib, "d3dcompiler.lib") 
+
 CDemo::CDemo()
 {
 
@@ -105,8 +109,8 @@ void CDemo::Initialize(HWND hwnd)
 
 	D3D11_INPUT_ELEMENT_DESC desc[] =
 	{
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-		0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 	unsigned int totle_layout = ARRAYSIZE(desc);
 
@@ -130,22 +134,45 @@ void CDemo::Initialize(HWND hwnd)
 
 	//initialize vertice
 	VertexPos vertices[] =
-	{
-		XMFLOAT3(0.5f, 0.5f, 0.5f),
-		XMFLOAT3(0.5f, -0.5f, 0.5f),
-		XMFLOAT3(-0.5f, -0.5f, 0.5f)
+	{ 
+		{ XMFLOAT3(0.8f, 0.8f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
+		{ XMFLOAT3(0.8f, -0.8f, 1.0f), XMFLOAT2(1.0f, 0.0f) },
+		{ XMFLOAT3(-0.8f, -0.8f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(-0.8f, -0.8f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(-0.8f, 0.8f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+		{ XMFLOAT3(0.8f, 0.8f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
 	};
 	D3D11_BUFFER_DESC vertex_desc;
 	ZeroMemory(&vertex_desc, sizeof(vertex_desc));
 	vertex_desc.Usage = D3D11_USAGE_DEFAULT;
 	vertex_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertex_desc.ByteWidth = sizeof(VertexPos) * 3;
+	vertex_desc.ByteWidth = sizeof(VertexPos) * 6;
 	
 	D3D11_SUBRESOURCE_DATA resouce_data;
 	ZeroMemory(&resouce_data, sizeof(resouce_data));
 	resouce_data.pSysMem = vertices;
 
 	d3dresult = device->CreateBuffer(&vertex_desc, &resouce_data, &vertex_buffer);
+	if (FAILED(d3dresult)) {
+		return;
+	}
+
+	//texture
+	d3dresult = D3DX11CreateShaderResourceViewFromFile(device, "res/tex/decal.dds", 0, 0, &shader_resourceview, 0);
+	if (FAILED(d3dresult)) {
+		return;
+	}
+
+	D3D11_SAMPLER_DESC sampler_desc;
+	ZeroMemory(&sampler_desc, sizeof(sampler_desc));
+	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	d3dresult = device->CreateSamplerState(&sampler_desc, &sampler_state);
 	if (FAILED(d3dresult)) {
 		return;
 	}
@@ -188,7 +215,9 @@ void CDemo::Render()
 	device_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	device_context->VSSetShader(vertex_shader, 0, 0);
 	device_context->PSSetShader(pixel_shader, 0, 0);
-	device_context->Draw(3, 0);
+	device_context->PSSetShaderResources(0, 1, &shader_resourceview);
+	device_context->PSSetSamplers(0, 1, &sampler_state);
+	device_context->Draw(6, 0);
 
 	swap_chain->Present(0, 0);
 }

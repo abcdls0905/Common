@@ -12,6 +12,7 @@ class CDemo
 	struct VertexPos
 	{
 		XMFLOAT3 position;
+		XMFLOAT2 uv;
 	};
 
 public:
@@ -31,4 +32,6 @@ private:
 	ID3D11PixelShader* pixel_shader;
 	ID3D11InputLayout* input_layout;
 	ID3D11Buffer* vertex_buffer;
+	ID3D11ShaderResourceView* shader_resourceview;
+	ID3D11SamplerState* sampler_state;
 };
