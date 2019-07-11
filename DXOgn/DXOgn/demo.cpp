@@ -89,6 +89,85 @@ void CDemo::Initialize(HWND hwnd)
 	viewport.TopLeftY = 0;
 
 	device_context->RSSetViewports(1, &viewport);
+
+	//initialize shader
+	ID3DBlob* vsbuffer = nullptr;
+	bool compile_result =	CompileShader("res/shader/standard.hlsl", "VS_Main", "vs_4_0", &vsbuffer);
+	if (!compile_result) {
+		return;
+	}
+
+	HRESULT d3dresult = device->CreateVertexShader(vsbuffer->GetBufferPointer(), vsbuffer->GetBufferSize(), 0, &vertex_shader);
+	if (FAILED(d3dresult))
+	{
+		return;
+	}
+
+	D3D11_INPUT_ELEMENT_DESC desc[] =
+	{
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+		0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	unsigned int totle_layout = ARRAYSIZE(desc);
+
+	d3dresult = device->CreateInputLayout(desc, totle_layout, vsbuffer->GetBufferPointer(), vsbuffer->GetBufferSize(), &input_layout);
+
+	vsbuffer->Release();
+	if (FAILED(d3dresult)) {
+		return;
+	}
+
+	ID3DBlob* psbuffer = 0;
+	compile_result = CompileShader("res/shader/standard.hlsl", "PS_Main", "ps_4_0", &psbuffer);
+	if (!compile_result) {
+		return;
+	}
+	d3dresult = device->CreatePixelShader(psbuffer->GetBufferPointer(), psbuffer->GetBufferSize(), 0, &pixel_shader);
+	if (FAILED(d3dresult)) {
+		return;
+	}
+	psbuffer->Release();
+
+	//initialize vertice
+	VertexPos vertices[] =
+	{
+		XMFLOAT3(0.5f, 0.5f, 0.5f),
+		XMFLOAT3(0.5f, -0.5f, 0.5f),
+		XMFLOAT3(-0.5f, -0.5f, 0.5f)
+	};
+	D3D11_BUFFER_DESC vertex_desc;
+	ZeroMemory(&vertex_desc, sizeof(vertex_desc));
+	vertex_desc.Usage = D3D11_USAGE_DEFAULT;
+	vertex_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertex_desc.ByteWidth = sizeof(VertexPos) * 3;
+	
+	D3D11_SUBRESOURCE_DATA resouce_data;
+	ZeroMemory(&resouce_data, sizeof(resouce_data));
+	resouce_data.pSysMem = vertices;
+
+	d3dresult = device->CreateBuffer(&vertex_desc, &resouce_data, &vertex_buffer);
+	if (FAILED(d3dresult)) {
+		return;
+	}
+}
+
+bool CDemo::CompileShader(char* file, char* entry, char* shader_model, ID3DBlob** buffer)
+{
+	DWORD shader_flag = D3DCOMPILE_ENABLE_STRICTNESS;
+
+#ifdef _DEBUG
+	shader_flag |= D3DCOMPILE_DEBUG;
+#endif
+	ID3DBlob* errorbuffer = nullptr;
+	HRESULT result = D3DX11CompileFromFile(file, 0, 0, entry, shader_model, shader_flag, 0, 0, buffer, &errorbuffer, 0);
+	if (FAILED(result)) {
+		return false;
+	}
+
+	if (errorbuffer) {
+		errorbuffer->Release();
+	}
+	return true;
 }
 
 void CDemo::Update()
@@ -100,6 +179,17 @@ void CDemo::Render()
 {
 	float color[4] = { 0.25f, 0, 0.25f, 1 };
 	device_context->ClearRenderTargetView(render_target, color);
+
+	unsigned int stride = sizeof(VertexPos);
+	unsigned int offset = 0;
+
+	device_context->IASetInputLayout(input_layout);
+	device_context->IASetVertexBuffers(0, 1, &vertex_buffer, &stride, &offset);
+	device_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	device_context->VSSetShader(vertex_shader, 0, 0);
+	device_context->PSSetShader(pixel_shader, 0, 0);
+	device_context->Draw(3, 0);
+
 	swap_chain->Present(0, 0);
 }
 
