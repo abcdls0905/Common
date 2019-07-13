@@ -18,10 +18,28 @@ CDemo::~CDemo()
 
 void CDemo::Initialize(HWND hwnd)
 {
+	XMMATRIX I = XMMatrixIdentity();
+	XMStoreFloat4x4(&mWorld, I);
+	XMStoreFloat4x4(&mView, I);
+	XMStoreFloat4x4(&mProj, I);
+
 	RECT demensions;
 	GetClientRect(hwnd, &demensions);
 	unsigned int width = demensions.right - demensions.left;
 	unsigned int height = demensions.bottom - demensions.top;
+
+	float PI = 3.1415926f;
+	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f*PI,
+		(float)width / height, 1.0f, 1000.0f);
+	XMStoreFloat4x4(&mProj, P);
+
+	XMMATRIX projMatrix_ = XMMatrixPerspectiveFovLH(XM_PIDIV4, (float)width / height, 0.01f, 100.0f);
+	projMatrix_ = XMMatrixTranspose(projMatrix_);
+	XMStoreFloat4x4(&mProj, projMatrix_);
+
+	XMMATRIX viewMatrix_ = XMMatrixIdentity();
+	viewMatrix_ = XMMatrixTranspose(viewMatrix_);
+	XMStoreFloat4x4(&mView, viewMatrix_);
 
 	D3D_DRIVER_TYPE drive_types[] = 
 	{
@@ -132,27 +150,59 @@ void CDemo::Initialize(HWND hwnd)
 	}
 	psbuffer->Release();
 
-	//initialize vertice
+	//vertice buffer
 	VertexPos vertices[] =
 	{ 
-		{ XMFLOAT3(0.8f, 0.8f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
-		{ XMFLOAT3(0.8f, -0.8f, 1.0f), XMFLOAT2(1.0f, 0.0f) },
-		{ XMFLOAT3(-0.8f, -0.8f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(-0.8f, -0.8f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(-0.8f, 0.8f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
-		{ XMFLOAT3(0.8f, 0.8f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+		{ XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT2(1.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT2(1.0f, 0.0f) },
+		{ XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT2(0.0f, 0.0f) },
 	};
+
 	D3D11_BUFFER_DESC vertex_desc;
 	ZeroMemory(&vertex_desc, sizeof(vertex_desc));
 	vertex_desc.Usage = D3D11_USAGE_DEFAULT;
 	vertex_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertex_desc.ByteWidth = sizeof(VertexPos) * 6;
+	vertex_desc.ByteWidth = sizeof(VertexPos) * 8;
 	
 	D3D11_SUBRESOURCE_DATA resouce_data;
 	ZeroMemory(&resouce_data, sizeof(resouce_data));
 	resouce_data.pSysMem = vertices;
 
 	d3dresult = device->CreateBuffer(&vertex_desc, &resouce_data, &vertex_buffer);
+	if (FAILED(d3dresult)) {
+		return;
+	}
+
+	//indice buffer
+	UINT indices[] = {
+		0, 1, 2,
+		0, 2, 3,
+		4, 6, 5,
+		4, 7, 6,
+		4, 5, 1,
+		4, 1, 0,
+		3, 2, 6,
+		3, 6, 7,
+		1, 5, 6,
+		1, 6, 2,
+		4, 0, 3,
+		4, 3, 7
+	};
+	D3D11_BUFFER_DESC index_desc;
+	ZeroMemory(&index_desc, sizeof(index_desc));
+	index_desc.Usage = D3D11_USAGE_DEFAULT;
+	index_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	index_desc.ByteWidth = sizeof(UINT) * 36;
+	index_desc.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA index_data;
+	ZeroMemory(&index_data, sizeof(index_data));
+	index_data.pSysMem = indices;
+	d3dresult = device->CreateBuffer(&index_desc, &index_data, &index_buffer);
 	if (FAILED(d3dresult)) {
 		return;
 	}
@@ -176,6 +226,26 @@ void CDemo::Initialize(HWND hwnd)
 	if (FAILED(d3dresult)) {
 		return;
 	}
+
+	//cb
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
+	bd.ByteWidth = sizeof(CBMVP);
+	device->CreateBuffer(&bd, nullptr, &mvp_buffer);
+
+
+	D3D11_BUFFER_DESC constDesc;
+	ZeroMemory(&constDesc, sizeof(constDesc));
+	constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constDesc.ByteWidth = sizeof(XMMATRIX);
+	constDesc.Usage = D3D11_USAGE_DEFAULT;
+
+	device->CreateBuffer(&constDesc, 0, &viewCB_);
+	device->CreateBuffer(&constDesc, 0, &projCB_);
+	device->CreateBuffer(&constDesc, 0, &worldCB_);
 }
 
 bool CDemo::CompileShader(char* file, char* entry, char* shader_model, ID3DBlob** buffer)
@@ -199,12 +269,37 @@ bool CDemo::CompileShader(char* file, char* entry, char* shader_model, ID3DBlob*
 
 void CDemo::Update()
 {
+// 	XMVECTOR pos = XMVectorSet(0, 0, -6, 1.0f);
+// 	XMVECTOR target = XMVectorZero();
+// 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+// 	XMMATRIX V = XMMatrixLookAtLH(pos, target, up);
+// 	XMStoreFloat4x4(&mView, V);
+// 
+// 	XMMATRIX world = XMLoadFloat4x4(&mWorld);
+// 	XMMATRIX view = XMLoadFloat4x4(&mView);
+// 	XMMATRIX proj = XMLoadFloat4x4(&mProj);
+// 	XMMATRIX worldViewProj = world*view*proj;
 
+
+	XMMATRIX rotationMat = XMMatrixRotationRollPitchYaw(0.0f, 0.7f, 0.7f);
+	XMMATRIX translationMat = XMMatrixTranslation(0.0f, 0.0f, 6.0f);
+	XMMATRIX worldMat = rotationMat * translationMat;
+	worldMat = XMMatrixTranspose(worldMat);
+	XMStoreFloat4x4(&mView, worldMat);
+
+	XMMATRIX world = XMLoadFloat4x4(&mWorld);
+	XMMATRIX view = XMLoadFloat4x4(&mView);
+	XMMATRIX proj = XMLoadFloat4x4(&mProj);
+	XMMATRIX worldViewProj = world*view*proj;	
+	
+	CBMVP cb_mvp;
+	cb_mvp.mvp = worldViewProj;
+	device_context->UpdateSubresource(mvp_buffer, 0, nullptr, &cb_mvp, 0, 0);
 }
 
 void CDemo::Render()
 {
-	float color[4] = { 0.25f, 0, 0.25f, 1 };
+	float color[4] = { 0.25f, 0.25f, 0.25f, 1 };
 	device_context->ClearRenderTargetView(render_target, color);
 
 	unsigned int stride = sizeof(VertexPos);
@@ -212,12 +307,24 @@ void CDemo::Render()
 
 	device_context->IASetInputLayout(input_layout);
 	device_context->IASetVertexBuffers(0, 1, &vertex_buffer, &stride, &offset);
+	device_context->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
 	device_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	device_context->VSSetShader(vertex_shader, 0, 0);
 	device_context->PSSetShader(pixel_shader, 0, 0);
 	device_context->PSSetShaderResources(0, 1, &shader_resourceview);
 	device_context->PSSetSamplers(0, 1, &sampler_state);
-	device_context->Draw(6, 0);
+	//device_context->Draw(6, 0);
+	//device_context->VSSetConstantBuffers(0, 1, &mvp_buffer);
+
+	device_context->UpdateSubresource(worldCB_, 0, 0, &mWorld, 0, 0);
+	device_context->UpdateSubresource(viewCB_, 0, 0, &mView, 0, 0);
+	device_context->UpdateSubresource(projCB_, 0, 0, &mProj, 0, 0);
+
+	device_context->VSSetConstantBuffers(0, 1, &worldCB_);
+	device_context->VSSetConstantBuffers(1, 1, &viewCB_);
+	device_context->VSSetConstantBuffers(2, 1, &projCB_);
+
+	device_context->DrawIndexed(36, 0, 0);
 
 	swap_chain->Present(0, 0);
 }

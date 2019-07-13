@@ -1,4 +1,19 @@
 
+cbuffer cbChangesEveryFrame : register( b0 )
+{
+    matrix worldMatrix;
+};
+
+cbuffer cbNeverChanges : register( b1 )
+{
+    matrix viewMatrix;
+};
+
+cbuffer cbChangeOnResize : register( b2 )
+{
+    matrix projMatrix;
+};
+
 Texture2D diffuse : register(t0);
 SamplerState linefiler : register(s0);
 
@@ -17,7 +32,11 @@ struct PS_Input
 PS_Input VS_Main(VS_Input input)
 {
 	PS_Input vsOut = (PS_Input)0;
-	vsOut.pos = input.pos;
+    vsOut.pos = mul( input.pos, worldMatrix );
+    vsOut.pos = mul( vsOut.pos, viewMatrix );
+    vsOut.pos = mul( vsOut.pos, projMatrix );
+	//vsOut.pos = mul(input.pos, gWorldViewProj);
+	//vsOut.pos = input.pos;
 	vsOut.uv = input.uv;
 	return vsOut;
 }

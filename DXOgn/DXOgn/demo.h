@@ -15,6 +15,11 @@ class CDemo
 		XMFLOAT2 uv;
 	};
 
+	struct CBMVP
+	{
+		XMMATRIX mvp;
+	};
+
 public:
 	CDemo();
 	~CDemo();
@@ -32,6 +37,16 @@ private:
 	ID3D11PixelShader* pixel_shader;
 	ID3D11InputLayout* input_layout;
 	ID3D11Buffer* vertex_buffer;
+	ID3D11Buffer* index_buffer;
 	ID3D11ShaderResourceView* shader_resourceview;
 	ID3D11SamplerState* sampler_state;
+	ID3D11Buffer* mvp_buffer;
+
+	ID3D11Buffer* viewCB_;
+	ID3D11Buffer* projCB_;
+	ID3D11Buffer* worldCB_;
+
+	XMFLOAT4X4 mWorld;
+	XMFLOAT4X4 mView;
+	XMFLOAT4X4 mProj;
 };
