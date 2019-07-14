@@ -152,22 +152,42 @@ void CDemo::Initialize(HWND hwnd)
 
 	//vertice buffer
 	VertexPos vertices[] =
-	{ 
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-		{ XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT2(1.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT2(1.0f, 0.0f) },
-		{ XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT2(0.0f, 0.0f) },
+	{ { XMFLOAT3(-1.0f,  1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+	{ XMFLOAT3(1.0f,  1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+	{ XMFLOAT3(1.0f,  1.0f,  1.0f), XMFLOAT2(1.0f, 1.0f) },
+	{ XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT2(0.0f, 1.0f) },
+
+	{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+	{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+	{ XMFLOAT3(1.0f, -1.0f,  1.0f), XMFLOAT2(1.0f, 1.0f) },
+	{ XMFLOAT3(-1.0f, -1.0f,  1.0f), XMFLOAT2(0.0f, 1.0f) },
+
+	{ XMFLOAT3(-1.0f, -1.0f,  1.0f), XMFLOAT2(0.0f, 0.0f) },
+	{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+	{ XMFLOAT3(-1.0f,  1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
+	{ XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT2(0.0f, 1.0f) },
+
+	{ XMFLOAT3(1.0f, -1.0f,  1.0f), XMFLOAT2(0.0f, 0.0f) },
+	{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+	{ XMFLOAT3(1.0f,  1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
+	{ XMFLOAT3(1.0f,  1.0f,  1.0f), XMFLOAT2(0.0f, 1.0f) },
+
+	{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+	{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+	{ XMFLOAT3(1.0f,  1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
+	{ XMFLOAT3(-1.0f,  1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) },
+
+	{ XMFLOAT3(-1.0f, -1.0f,  1.0f), XMFLOAT2(0.0f, 0.0f) },
+	{ XMFLOAT3(1.0f, -1.0f,  1.0f), XMFLOAT2(1.0f, 0.0f) },
+	{ XMFLOAT3(1.0f,  1.0f,  1.0f), XMFLOAT2(1.0f, 1.0f) },
+	{ XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT2(0.0f, 1.0f) },
 	};
 
 	D3D11_BUFFER_DESC vertex_desc;
 	ZeroMemory(&vertex_desc, sizeof(vertex_desc));
 	vertex_desc.Usage = D3D11_USAGE_DEFAULT;
 	vertex_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertex_desc.ByteWidth = sizeof(VertexPos) * 8;
+	vertex_desc.ByteWidth = sizeof(VertexPos) * ARRAYSIZE(vertices);
 	
 	D3D11_SUBRESOURCE_DATA resouce_data;
 	ZeroMemory(&resouce_data, sizeof(resouce_data));
@@ -180,18 +200,12 @@ void CDemo::Initialize(HWND hwnd)
 
 	//indice buffer
 	UINT indices[] = {
-		0, 1, 2,
-		0, 2, 3,
-		4, 6, 5,
-		4, 7, 6,
-		4, 5, 1,
-		4, 1, 0,
-		3, 2, 6,
-		3, 6, 7,
-		1, 5, 6,
-		1, 6, 2,
-		4, 0, 3,
-		4, 3, 7
+		3,   1,  0,  2,  1,  3,
+		6,   4,  5,  7,  4,  6,
+		11,  9,  8, 10,  9, 11,
+		14, 12, 13, 15, 12, 14,
+		19, 17, 16, 18, 17, 19,
+		22, 20, 21, 23, 20, 22
 	};
 	D3D11_BUFFER_DESC index_desc;
 	ZeroMemory(&index_desc, sizeof(index_desc));
