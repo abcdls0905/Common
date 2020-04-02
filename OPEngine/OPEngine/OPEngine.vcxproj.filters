@@ -18,6 +18,9 @@
     <ClCompile Include="runtime\skybox.cpp">
       <Filter>runtime</Filter>
     </ClCompile>
+    <ClCompile Include="runtime\fbxloader\fbx_loader.cpp">
+      <Filter>runtime\fbxloader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h" />
@@ -44,6 +47,13 @@
     <ClInclude Include="runtime\skybox.h">
       <Filter>runtime</Filter>
     </ClInclude>
+    <ClInclude Include="runtime\fbxloader\fbx_header.h">
+      <Filter>runtime\fbxloader</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\fbxloader\fbx_loader.h">
+      <Filter>runtime\fbxloader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\gl\includes\learnopengl\camera.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="runtime">
@@ -63,6 +73,9 @@
     </Filter>
     <Filter Include="runtime\model">
       <UniqueIdentifier>{47733730-323e-44c5-bbbb-c946a9f13a9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="runtime\fbxloader">
+      <UniqueIdentifier>{245b5da0-8ade-4baa-8ca0-54ca0e3f1c36}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

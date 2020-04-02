@@ -415,7 +415,7 @@ void renderQuad()
 
 int index = 0;
 int lastframe = 0;
-int intervalframe = 15;
+int intervalframe = 6;
 
 void App::OnFrame()
 {
