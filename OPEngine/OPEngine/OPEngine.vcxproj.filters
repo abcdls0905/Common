@@ -54,6 +54,7 @@
       <Filter>runtime\fbxloader</Filter>
     </ClInclude>
     <ClInclude Include="..\extern\gl\includes\learnopengl\camera.h" />
+    <ClInclude Include="ocean.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="runtime">

@@ -161,7 +161,7 @@ void Mesh::RenderNode(MeshData* pMesh)
     // material properties
     useShader->setFloat("material.shininess", 32);
 
-    glDrawElements(GL_TRIANGLES, pMesh->m_IndiceSize, GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_TRIANGLE_STRIP, pMesh->m_IndiceSize, GL_UNSIGNED_SHORT, 0);
 
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);

@@ -8,6 +8,7 @@
 #include "vertdata.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "ocean.hpp"
 
 using namespace std;
 
@@ -303,7 +304,7 @@ void App::Init(int screen_width, int screen_height)
     //water
 	if (1)
     {
-        const int count = 64;
+        const int count = 16;
         const int trianle = 6;
         const int length = 8;
         float waterVertexs[count * count * length] = {0};
@@ -348,6 +349,35 @@ void App::Init(int screen_width, int screen_height)
                 indices[index + 5] = x2;
             }
         }
+		
+		std::vector<SubRangeRender> subsettable;
+		std::vector<uint32_t> indices_ocean;
+
+		int numlods = Log2OfPow2(MESH_SIZE);
+
+		indices_ocean.resize(IndexCounts[numlods]);
+
+		GLuint numsubsets = (numlods - 2) * 3 * 3 * 3 * 3 * 2;
+		subsettable.resize(numsubsets);
+
+		GenerateLODLevels(subsettable, &numsubsets, indices_ocean.data());
+		std::vector<glm::vec3> vertices;
+		GenerateVertice(vertices);
+
+		//float waterVertexs_[count * count * length] = { 0 };
+		std::vector<float>waterVertexs_;
+		for (int i = 0; i < vertices.size(); ++i)
+		{
+			glm::vec3& v = vertices[i];
+			waterVertexs_.push_back(v.x);
+			waterVertexs_.push_back(v.y);
+			waterVertexs_.push_back(v.z);
+			waterVertexs_.push_back(0);
+			waterVertexs_.push_back(1);
+			waterVertexs_.push_back(0);
+			waterVertexs_.push_back(0);
+			waterVertexs_.push_back(0);
+		}
 
         CModel* pModel1 = new CModel();
 		pModel1->m_tag = 10;
@@ -355,9 +385,9 @@ void App::Init(int screen_width, int screen_height)
         MeshData* meshData1 = new MeshData();
         meshData1->CreateShader("assets/shader_ocean.vert", "assets/shader_ocean.frag");
 
-        meshData1->SetVertex(waterVertexs, count * count, length);
+        meshData1->SetVertex(waterVertexs_.data(), (MESH_SIZE + 1)* (MESH_SIZE + 1), length);
 
-		meshData1->SetIndice(indices, index_count * index_count * trianle);
+		//meshData1->SetIndice(indices_.data(), indices_.size());
         meshData1->m_Tex = Util::LoadTexture("textures/ocean.png");
         meshData1->m_Tex1 = Util::LoadTexture_float("textures/displacement.png");
 		for (int i = 0; i < dis_count; i++)
@@ -373,7 +403,7 @@ void App::Init(int screen_width, int screen_height)
         meshData1->Initialize();
         meshData1->m_Pos = glm::vec3(-count/2, 5, -count/2);
         pModel1->m_Mesh->m_Roots.push_back(meshData1);
-        m_Models.push_back(pModel1);
+        //m_Models.push_back(pModel1);
     }
 }
 
